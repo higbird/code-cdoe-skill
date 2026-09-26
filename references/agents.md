@@ -56,3 +56,5 @@ python -B -m unittest discover -s <skill>/tests -v
 无终端或缺少依赖时可以提供检查与修改建议，但要如实标注未执行部分。真实科学数据、R/Bash 环境和不同远程后端仍需各自验收。
 
 兼容依据为 [Claude Code Skills](https://code.claude.com/docs/en/skills)、[Codex Skills](https://learn.chatgpt.com/docs/build-skills)、[Hermes Skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/)。格式兼容与程序测试通过不等于三端模型端到端验收通过。
+
+分析前执行 [环境检查与恢复](environment.md)。四项模块目录规则允许工具必需环境元数据例外；合成 Python 示例没有这些元数据，仍检查四项。Rscript 按项目环境、用户指定配置、PATH 顺序定位；检查、恢复和分析复用同一解释器与启动配置。固定解释器不代表固定包库，失败后按 environment.md 定位并记录原始证据，不能用 RStudio 中能加载包代替实际执行环境的检查。
