@@ -503,11 +503,10 @@ class WorkflowTests(unittest.TestCase):
     def test_bundled_example_cli_from_other_directory_and_unicode_path(self):
         project = self.root / "中文 project"
         shutil.copytree(SCRIPT.parents[1] / "assets/minimal", project)
-        manifest = project / "input/workflow.json"
-        def cli(action):
-            return subprocess.run([sys.executable, "-X", "utf8", "-B", str(SCRIPT), action, str(manifest), "--root", str(project)],
+        def cli(*parameters):
+            return subprocess.run([sys.executable, "-X", "utf8", "-B", str(project / "code.txt"), *parameters],
                                   cwd=self.root, capture_output=True, encoding="utf-8")
-        first = cli("run")
+        first = cli()
         self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
         with (project / "output/summary.tsv").open() as handle:
             rows = list(csv.DictReader(handle, delimiter="\t"))
@@ -516,15 +515,16 @@ class WorkflowTests(unittest.TestCase):
         tree = ET.parse(project / "output/means.svg")
         labels = [node.text for node in tree.findall(".//{http://www.w3.org/2000/svg}text")]
         self.assertEqual(labels, ["Synthetic group means", "A", "3", "B", "7"])
-        self.assertEqual([x["action"] for x in json.loads(cli("plan").stdout)], ["skip", "skip"])
-        original = workflow.receipt(project, "analysis")["run_id"]
-        cfg = workflow.read_json(manifest)
-        cfg["stages"][1]["params"]["title"] = "中文标题"
-        workflow.write_json(manifest, cfg)
-        self.assertEqual([x["action"] for x in json.loads(cli("plan").stdout)], ["skip", "run"])
-        self.assertEqual(cli("run").returncode, 0)
-        self.assertEqual(workflow.receipt(project, "analysis")["run_id"], original)
+        original = (project / "output/summary.tsv").read_bytes()
+        self.assertEqual(cli("--title", "中文标题").returncode, 0)
+        self.assertEqual((project / "output/summary.tsv").read_bytes(), original)
         self.assertIn("中文标题", (project / "output/means.svg").read_text(encoding="utf-8"))
+        self.assertEqual({path.name for path in project.iterdir()},
+                         {"input", "output", "code.txt", "readme.md"})
+        self.assertEqual({path.name for path in (project / "input").iterdir()}, {"data.tsv"})
+        self.assertEqual({path.name for path in (project / "output").iterdir()},
+                         {"summary.tsv", "means.svg"})
+        self.assertTrue(all(path.is_file() for path in (project / "output").iterdir()))
 
 
 

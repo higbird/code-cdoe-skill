@@ -1,38 +1,95 @@
-"""Single entry point for this module; requires only Python 3.11+."""
 import argparse
-import os
+import csv
+import html
+import io
+import math
 from pathlib import Path
-import subprocess
-import sys
+import tempfile
+
+
+def read_groups(path, scale):
+    groups = {}
+    identifiers = set()
+    with path.open(encoding="utf-8", newline="") as source:
+        reader = csv.DictReader(source, delimiter="\t")
+        if not {"id", "group", "value"}.issubset(reader.fieldnames or []):
+            raise ValueError("Input requires id, group, and value columns")
+        for line, row in enumerate(reader, start=2):
+            identifier, group = row["id"], row["group"]
+            if not identifier or identifier in identifiers or not group:
+                raise ValueError(f"Line {line}: id must be unique and id/group must be present")
+            value = float(row["value"])
+            scaled = value * scale
+            if not math.isfinite(value) or value < 0 or not math.isfinite(scaled):
+                raise ValueError(f"Line {line}: value must be finite and nonnegative after scaling")
+            identifiers.add(identifier)
+            groups.setdefault(group, []).append(scaled)
+    if not groups:
+        raise ValueError("Input requires at least one data row")
+    rows = []
+    for group, values in sorted(groups.items()):
+        mean = math.fsum(value / len(values) for value in values)
+        rows.append((group, len(values), mean))
+    return rows
+
+
+def summary_text(rows):
+    target = io.StringIO(newline="")
+    writer = csv.writer(target, delimiter="\t")
+    writer.writerow(["group", "n", "mean"])
+    writer.writerows(rows)
+    return target.getvalue()
+
+
+def plot_text(rows, title, color):
+    maximum = max(mean for _, _, mean in rows) or 1
+    height = 100 + 48 * len(rows)
+    svg = [f'<svg xmlns="http://www.w3.org/2000/svg" width="620" height="{height}" viewBox="0 0 620 {height}">',
+           '<rect width="100%" height="100%" fill="white"/>',
+           f'<text x="24" y="32" font-family="sans-serif" font-size="20">{html.escape(title)}</text>']
+    for index, (group, _, mean) in enumerate(rows):
+        y = 60 + index * 48
+        width = mean / maximum * 350
+        svg.extend([
+            f'<text x="24" y="{y + 21}" font-family="sans-serif" font-size="15">{html.escape(group)}</text>',
+            f'<rect x="100" y="{y}" width="{width:.2f}" height="30" fill="{html.escape(color, quote=True)}"/>',
+            f'<text x="{112 + width:.2f}" y="{y + 21}" font-family="sans-serif" font-size="15">{mean:g}</text>'])
+    svg.append("</svg>")
+    return "\n".join(svg)
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", nargs="?", default="run", choices=("run", "plan", "recover"))
-    parser.add_argument("--skill-root", type=Path,
-                        default=os.environ.get("CODE_CDOE_SKILL_ROOT"),
-                        help="Skill directory; alternatively set CODE_CDOE_SKILL_ROOT")
-    parser.add_argument("--target", action="append", default=[])
-    parser.add_argument("--force", action="store_true")
-    parser.add_argument("--confirm-stopped", action="store_true")
-    parser.add_argument("--legacy-state", action="store_true")
+    parser = argparse.ArgumentParser(description="Compute synthetic group means and their bar chart")
+    parser.add_argument("--scale", type=float, default=1)
+    parser.add_argument("--title", default="Synthetic group means")
+    parser.add_argument("--color", default="#3568a8")
     args = parser.parse_args()
-    if args.skill_root is None:
-        parser.error("Provide --skill-root or set CODE_CDOE_SKILL_ROOT to the skill directory")
-    runner = args.skill_root.expanduser().resolve() / "scripts" / "analysis_workflow.py"
-    if not runner.is_file():
-        parser.error(f"Workflow runner not found: {runner}")
+    if not math.isfinite(args.scale) or args.scale < 0:
+        parser.error("--scale must be finite and nonnegative")
     root = Path(__file__).resolve().parent
-    command = [sys.executable, "-B", str(runner), args.action,
-               str(root / "input" / "workflow.json"), "--root", str(root)]
-    for target in args.target:
-        command.extend(("--target", target))
-    for flag in ("force", "confirm_stopped", "legacy_state"):
-        if getattr(args, flag):
-            command.append("--" + flag.replace("_", "-"))
-    environment = dict(os.environ, PYTHONDONTWRITEBYTECODE="1")
-    return subprocess.run(command, cwd=root, env=environment, shell=False).returncode
+    try:
+        rows = read_groups(root / "input" / "data.tsv", args.scale)
+    except (OSError, ValueError, TypeError) as error:
+        parser.error(str(error))
+    results = {"summary.tsv": summary_text(rows),
+               "means.svg": plot_text(rows, args.title, args.color)}
+    output = root / "output"
+    output.mkdir(exist_ok=True)
+    for name, content in results.items():
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", newline="",
+                                         dir=output, delete=False) as target:
+            pending = Path(target.name)
+            try:
+                target.write(content)
+            except BaseException:
+                target.close()
+                pending.unlink(missing_ok=True)
+                raise
+        try:
+            pending.replace(output / name)
+        finally:
+            pending.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

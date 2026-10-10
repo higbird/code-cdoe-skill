@@ -1,25 +1,29 @@
-# 可选执行工具
+# 既有工作流兼容工具
 
-本页用于接入通用检查、安全运行、运行凭据和按依赖重跑。简单任务不必接入；已有 Snakemake、Nextflow、Makefile 等有效流程优先继续使用。
+本页记录 `scripts/analysis_workflow.py` 已有的检查、安全运行、运行凭据和按依赖重跑接口，供用户明确授权继续维护的既有工作流使用。整页的配置、辅助源码、多阶段、状态和持久恢复布局均属于兼容功能，不是新四件套的组织模板；不因工具存在就默认接入新分析，也不自动迁移或删除旧配置、锁或运行证据。已有 Snakemake、Nextflow、Makefile 等有效流程同样先保留，维护范围由用户请求决定。
 
-工具：`scripts/analysis_workflow.py`。需要 Python 3.11 或更新版本，仅依赖标准库。Bash、R 和其他程序仍需在用户环境中已有配置；工具不安装软件、不选择统计方法。
+新建或按新规则整理的四件套对应一个有明确输入、目标和产物、可独立运行与检查的分析阶段：`input/` 只放数据或必要链接；运行代码及必要执行参数集中在 `code.txt`；数据、方法与参数说明、软件及包版本、依赖环境及运行方式集中在 `readme.md`。不新建 `input/src/`、`workflow.json`、`config.json`、`checks.json` 或 `paths.md` 作为代码、配置或说明层，README 不用作程序配置。配套计算与图件可在本阶段一并生成；独立下游分析另建四件套。
+
+新阶段的 `output/` 默认平铺，只放本阶段脚本生成的产物，不默认累积 `runs/`、运行凭据、状态、审计或日志历史目录；重复运行更新对应结果，本次安全暂存成功后清理。因此不能把下文要求持久状态的运行器当作新阶段的默认入口。保留原始数据和既有文件，必要环境元数据按工具要求原位保留；以上规则不授权清空已有目录。
+
+兼容工具：`scripts/analysis_workflow.py`。需要 Python 3.11 或更新版本，仅依赖标准库。Bash、R 和其他程序仍需在用户环境中已有配置；工具不安装软件、不选择统计方法。以下命令和字段均仅说明用户已授权维护的既有接口。
 
 ## 接入与命令
 
 先检查现有脚本能否接受输出目录和参数。只有脚本能将本次产物全部写入指定临时目录，才可以声称享有这里的安全替换保护。
 
-新建或整理的模块将配置放在 `input/workflow.json`，用 `--root` 显式指定模块根目录；输入、源码和命令按该根目录解析，正式产物位于 `output/`，运行状态位于 `output/.analysis-state/`。工具本身不创建四项模块骨架，应由 Agent 或模板建立 `input/`、`output/`、`code.txt`、`readme.md`，并由 `code.txt` 统一调度。
+维护已接入运行器的项目时保留原配置位置，并用 `--root` 显式指定其真实项目根；输入、源码和命令按该根目录解析，正式产物位于 `output/`，运行状态位于 `output/.analysis-state/`。旧项目可能使用 `input/workflow.json` 和辅助源码，此处只记录其行为，不要求新阶段采用它们。工具本身不创建四件套，也不将旧多阶段流程自动拆分为新阶段目录。
 
-为兼容已有配置，省略 `--root` 时仍按配置所在目录解析项目根；新布局必须传模块根，不能省略。一个阶段是一组一起更新的产物，不一定要拆成新目录。只修改或重跑已有项目时，不自动迁移其布局。
+为兼容已有配置，省略 `--root` 时仍按配置所在目录解析项目根；不要将配置所在的 input 目录误当作项目根。运行器的 stage 是一组一起更新的产物，它可以比科研分析阶段更细，不决定新四件套边界。只修改或重跑已有项目时，不自动迁移其布局；按新规则整理时另行识别阶段边界和入口，不能仅以旧运行器 stage 数量机械拆分。
 
-以下是运行器接口命令，工作目录为模块根；日常使用以 `code.txt` 中声明的入口为准。命令中的 Python 使用项目环境；`<skill>` 替换成该 skill 的实际目录。PowerShell 中带空格或绝对路径的解释器应使用调用运算符 `&`。
+以下是兼容运行器接口命令，工作目录为既有项目根，配置占位符替换为项目原有路径；日常使用以既有入口和 `readme.md` 中声明的命令为准。命令中的 Python 使用项目环境；`<skill>` 替换成该 skill 的实际目录。PowerShell 中带空格或绝对路径的解释器应使用调用运算符 `&`。
 
 ```text
-python <skill>/scripts/analysis_workflow.py check input/checks.json --root .
-python <skill>/scripts/analysis_workflow.py plan input/workflow.json --root .
-python <skill>/scripts/analysis_workflow.py run input/workflow.json --root .
-python <skill>/scripts/analysis_workflow.py run input/workflow.json --root . --target plot
-python <skill>/scripts/analysis_workflow.py run input/workflow.json --root . --force --target analysis
+python <skill>/scripts/analysis_workflow.py check <原检查配置路径> --root .
+python <skill>/scripts/analysis_workflow.py plan <原工作流配置路径> --root .
+python <skill>/scripts/analysis_workflow.py run <原工作流配置路径> --root .
+python <skill>/scripts/analysis_workflow.py run <原工作流配置路径> --root . --target plot
+python <skill>/scripts/analysis_workflow.py run <原工作流配置路径> --root . --force --target analysis
 ```
 
 - `check`：只读检查明确声明的文件；默认按检查配置所在目录解析路径，可用 `--root` 指定基准。显式配置 fingerprint 时也会计算对应指纹。
@@ -29,11 +33,11 @@ python <skill>/scripts/analysis_workflow.py run input/workflow.json --root . --f
 - `--force`：强制重跑本次选中的阶段集合。未给 target 时选中全部阶段。
 - CLI 成功返回 0，配置、检查或执行失败返回 1，中断返回 130。分析命令的退出码写入成功凭据，非零退出写入失败证据。
 
-可复制整个 [最小示例目录](../assets/minimal/readme.md) 到独立工作目录，通过 `python code.txt --skill-root <skill目录> run` 试运行。不要只复制配置所在的 input 文件夹。示例是合成数据的分组均值和 SVG 条形图，不代表任何真实研究结果。
+[最小示例目录](../assets/minimal/readme.md) 展示新四件套的直接脚本入口，不用于演示此兼容运行器的配置、状态或多阶段接口。运行器的合成接口与故障行为由仓库 tests 验证，不代表任何真实研究结果。
 
 ## 文件检查配置
 
-需要独立检查配置时使用 `input/checks.json`，其中只有一个顶层字段：
+已授权维护的既有独立检查配置（旧项目可能为 `input/checks.json`）只有一个顶层字段；下例说明接口，不要求新阶段增加配置文件：
 
 ```json
 {
@@ -135,7 +139,7 @@ workflow 配置版本仍为 1，兼容原来的配置和严格默认值；新增
 
 ## 工作流配置
 
-顶层结构为 `{"version": 1, "stages": [...]}`。每个阶段的完整用法见 [示例配置](../assets/minimal/input/workflow.json)。
+既有工作流配置的顶层结构为 `{"version": 1, "stages": [...]}`。以下字段表说明兼容接口，不是新四件套模板。
 
 | 字段 | 必需 | 说明 |
 |---|---|---|
@@ -186,7 +190,7 @@ Python 可用 `json.loads(os.environ["ANALYSIS_PARAMS"])`；R 可用项目已有
 - 强制结束、超时或中断：可能保留锁。**先确认本工具及其子程序均已停止**，再运行：
 
 ```text
-python <skill>/scripts/analysis_workflow.py recover input/workflow.json --root . --confirm-stopped
+python <skill>/scripts/analysis_workflow.py recover <原工作流配置路径> --root . --confirm-stopped
 ```
 
 该标记是操作者对进程状态的明确确认，不能由等待超时推定。recover 根据事务日志恢复未完成的替换，校验备份内容；缺失或损坏的备份不会被假称为恢复成功。已完成的恢复可以重复执行。配置内容损坏时仍可用原配置路径和一致的 `--root` 定位项目根并恢复。失败与暂存证据默认保留，定位结束后只清理已确认属于该次运行的精确路径。
@@ -208,7 +212,7 @@ python <skill>/scripts/analysis_workflow.py recover input/workflow.json --root .
 python <skill>/scripts/analysis_workflow.py recover <原配置路径> --root <原项目根> --legacy-state --confirm-stopped
 ```
 
-如果新旧状态目录并存，旧状态恢复也会拒绝，需先核对两者对应的运行，不能通过删锁或覆盖目录消除冲突。恢复成功并不自动完成目录迁移；旧凭据、失败证据和已完成事务可能包含旧路径，不能承诺直接移动目录即可继续复用。确认无未完成事务后，按已授权的整理范围保留并归位旧证据，再使用新布局运行；未处理的旧状态会继续阻塞运行。
+如果新旧状态目录并存，旧状态恢复也会拒绝，需先核对两者对应的运行，不能通过删锁或覆盖目录消除冲突。恢复成功并不自动完成目录迁移；旧凭据、失败证据和已完成事务可能包含旧路径，不能承诺直接移动目录即可继续复用。确认无未完成事务后，按已授权的维护范围处理兼容状态；未处理的旧状态会继续阻塞运行器。用户要求按新四件套整理时，保留必要旧证据并另行适配直接脚本入口，不能以本工具的新状态布局替代新的 output 内容规则。
 
 ## 运行凭据与重跑判断
 
@@ -219,11 +223,11 @@ python <skill>/scripts/analysis_workflow.py recover <原配置路径> --root <�
 - 工具版本查询命令与输出、运行器哈希、Python 版本、平台和命令解释器路径及哈希；
 - 上游成功运行 ID、各产物的实际指纹与大小，以及输入/输出检查等级、已执行和未执行项。
 
-凭据是必要的程序执行证据，不是 Agent 自述日志。默认只保留最新成功版本，不是完整历史归档；需要复现历史结果时，应按项目要求一起保存原始输入版本、代码、环境声明及输出。凭据不能恢复原始数据，也不能证明脚本实际使用了每个声明参数。
+凭据是该兼容工具的程序执行证据，不是 Agent 自述日志，也不是新四件套的必需文件。工具默认只保留最新成功版本，不是完整历史归档；需要复现历史结果时，应按项目要求一起保存原始输入版本、代码、环境声明及输出。凭据不能恢复原始数据，也不能证明脚本实际使用了每个声明参数。
 
 判定为需要重跑的条件包括：没有有效凭据，输入/代码/参数/环境/校验要求/运行器变化，输出缺失或被修改，以及上游安排重跑或其成功运行 ID 变化。上游即使产生字节相同的结果，运行 ID 改变也会保守地使下游过期。
 
-只改图形参数时，要把这些参数放在 plot 阶段；分析参数留在 analysis 阶段。共享源码文件一旦改变，所有声明该文件的阶段均会重跑，工具不对源码做语义差异推断。
+既有配置已区分 plot 与 analysis 时，只改图形参数应更新 plot 的 params，分析参数留在 analysis 的 params；这不要求新分析为了参数变化拆出绘图四件套。共享源码文件一旦改变，所有声明该文件的运行器阶段均会重跑，工具不对源码做语义差异推断。
 
 默认完整 SHA-256 可能需要读取大型数据很久；显式使用 stat/external 时按前文记录较弱证据，不把时间戳或引用摘要当作本次内容验证。环境比较只覆盖声明的版本查询、列出的环境文件及实际命令解释器，不保证发现未声明依赖或相同版本号下的软件差异。含随机步骤须在 params 声明种子且由代码真正使用；这里不保证跨硬件逐位复现。
 
@@ -233,5 +237,5 @@ python <skill>/scripts/analysis_workflow.py recover <原配置路径> --root <�
 python -B -m unittest discover -s <skill>/tests -v
 ```
 
-测试使用合成数据和隔离临时目录，覆盖失败保护、替换/恢复故障、数据规则、环境变化、依赖重跑、分级验证、指纹强弱边界、缓存失效和旧凭据迁移。Windows 不允许创建符号链接时该用例会跳过；另有 Windows junction 实际验证。测试不代表已经在真实 GWAS、R/Bash 分析或所有操作系统上完成验收。
+兼容工具测试使用合成数据和隔离临时目录，覆盖失败保护、替换/恢复故障、数据规则、环境变化、依赖重跑、分级验证、指纹强弱边界、缓存失效和旧凭据迁移。其旧配置与状态测试不作为新四件套结构验收。Windows 不允许创建符号链接时该用例会跳过；另有 Windows junction 实际验证。测试不代表已经在真实 GWAS、R/Bash 分析或所有操作系统上完成验收。
 跨客户端资源与路径测试一并执行；安装后的客户端验收见 [宿主适配说明](agents.md)。不要求安装 Codex 的 skill-creator 或任何客户端 SDK。

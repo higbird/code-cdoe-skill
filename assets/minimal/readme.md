@@ -1,26 +1,31 @@
-# 合成数据最小示例
+# 合成数据分组均值示例
 
-用于演示检查、安全运行、运行凭据和按依赖重跑，不用于推断科学结论。
+本四件套记录一个独立分析阶段：读取合成数据，计算分组均值并生成配套条形图。分析与绘图由同一个 `code.txt` 完成，不据此拆成两套；本例不用于推断科学结论。
 
-- Input：input/data.tsv，4 个合成样本，id 为唯一键，value 为非负数。
-- Method：analysis 阶段按 group 计算 n 和均值，先乘以 params.scale；plot 阶段生成均值条形图。
-- Run：需要 Python 3.11+，无第三方依赖。复制整个 minimal 文件夹到工作目录，并保留空的 output/ 文件夹；不要直接在安装的 skill 内积累分析状态。
-- Output：output/summary.tsv 和 output/means.svg；本例输入要求至少一行，因此不产生空分组表。
+- 输入：`input/data.tsv`，随包提供的 4 个合成样本，未引用外部真实数据。`id` 是唯一且非空的样本标识，`group` 是非空组名，`value` 是有限非负数；至少有一行数据。
+- 方法：先将每个 `value` 乘以 `scale`，再按 `group` 计算样本数 `n` 和算术均值 `mean`；按组名排序。SVG 条形图展示同一结果，不新增分析步骤。
+- 参数：`--scale` 默认为 `1`，必须为有限非负数；`--title` 默认为 `Synthetic group means`；`--color` 默认为 `#3568a8`，指定 SVG 条形填充色。参数的执行定义在 `code.txt`，解释集中在本文件。
+- 软件与环境：Python 3.11+；本次验证使用 Python 3.11.9。仅依赖 Python 标准库，不需要第三方包、Skill 安装目录或运行器配置。优先使用项目已有 Python 环境。
+- 输出：`output/summary.tsv`，列为 `group`、`n`、`mean`；`output/means.svg`，分组均值条形图。默认输入产生 A 组 `n=2, mean=3`，B 组 `n=2, mean=7`。
 
-模块顶层始终只有 input/、output/、code.txt、readme.md。配置位于 input/workflow.json，辅助源码位于 input/src/，运行日志、事务和凭据位于 output/.analysis-state/。
-
-code.txt 是 Python 代码，也是唯一调度入口。使用项目的 Python，将下列 `<skill实际目录>` 替换为包含 SKILL.md 和 scripts/ 的 skill 绝对目录：
+复制整个 `minimal` 文件夹到独立工作目录，在该目录执行：
 
 ```text
-python code.txt --skill-root "<skill实际目录>" plan
-python code.txt --skill-root "<skill实际目录>" run
-python code.txt --skill-root "<skill实际目录>" plan
+python code.txt
 ```
 
-省略动作时默认 run。也可设置环境变量 CODE_CDOE_SKILL_ROOT 后直接运行 `python code.txt`。从其他目录启动时，为 code.txt 提供绝对路径；入口会从自身位置定位模块根，不依赖终端当前目录。恢复中断前先核对工作流及子进程均已停止，再使用 `python code.txt --skill-root "<skill实际目录>" recover --confirm-stopped`。
+必要时调整运行参数，例如：
 
-首次运行应执行 analysis 和 plot；完成后计划应均为 skip。
-修改 input/workflow.json 的 plot.params.title 时只重跑 plot；修改 analysis.params.scale 或 input/data.tsv 时重跑 analysis 及 plot。
-共享参数不要在两个阶段重复维护。
+```text
+python code.txt --scale 2 --title "Scaled synthetic group means" --color "#6a4c93"
+```
 
-本例 input/data.tsv 为随包提供的合成数据，未引用外部真实输入。实际分析若引用外部文件，将其绝对路径、用途和存在性检查结果记在 input/ 内的清单，并在本文件展示；不要将来源清单或日志放到模块顶层。安全协议与限制见 skill 的 references/tools.md。
+也可从其他工作目录使用 `code.txt` 的绝对路径；脚本从自身位置定位 `input/` 和 `output/`，不依赖终端当前目录。Windows PowerShell 指定解释器的示例：
+
+```powershell
+& 'C:\path\to\python.exe' 'D:\path with spaces\group_means\code.txt'
+```
+
+`output/` 在运行时创建，不需要为 Git 空目录添加占位文件。重复运行更新同名产物，成功后只保留本脚本生成的上述两个文件，不创建 `runs/`、运行编号或隐藏状态目录。已有不属于本脚本的文件不会被擅自清除，整理历史产物需另行核对其归属。
+
+`input/` 只包含本阶段输入数据；数据来源、字段、参数、版本、环境及运行方式均记录于本文件。若下游基于本阶段结果开展独立分析，应另建四件套，并从其 `input/` 使用本阶段产物。
