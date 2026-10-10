@@ -38,27 +38,27 @@ Fewer files do not justify omitting required dependencies, failure evidence, dat
 
 Check the user's objective, target directory, specified reference files, existing entry points, input and output status, and project environment.
 
-For large projects, first read the README, existing input manifests, and a shallow directory listing. Locate only files needed for the current task. Do not default to recursively traversing raw data directories, printing entire large tables in the conversation, or treating full-file line counts as inexpensive checks. Read headers, selected regions, and necessary statistics as needed; still perform full validation when scientifically required.
+For large projects, first read the README, existing input manifests, and a shallow directory listing. Locate only files needed for the current task. Do not default to recursively traversing raw data directories, printing entire large tables, or treating full-file line counts as inexpensive checks. Read headers, selected regions, and necessary statistics as needed; still perform full validation when scientifically required.
 
-Distinguish requests to create an analysis, modify implementation, rerun results, organize structure, or only explain and diagnose. Stay read-only for explanation or diagnosis. Make requested repairs or organizational changes within the corresponding authorization. If the user requests only draft code or a specification, deliver that content and state that the analysis was not run; do not invent a research task for validation.
+Distinguish requests to create an analysis, modify implementation, rerun results, organize structure, or only explain and diagnose. Stay read-only for explanation or diagnosis. Make requested repairs or organizational changes within the corresponding authorization. For draft-only requests, provide the code or specification without running an analysis.
 
-"Organize the four-item layout" includes placing files and adapting an entry point supported by evidence under Section 3; it does not automatically authorize running the analysis. "Adapt a runnable entry point" requires connecting the execution logic and completing necessary preflight checks within the declared scope. "Run and generate results" also requires actual execution and result validation. A complete directory layout cannot substitute for entry point adaptation, and empty directories do not justify expanding execution scope.
+"Organize the four-item layout" includes placing files and adapting an entry point supported by evidence under Section 3; it does not automatically authorize running the analysis. "Adapt a runnable entry point" requires connecting the execution logic and completing necessary preflight checks within the declared scope. "Run and generate results" also requires actual execution and result validation. Assess these separately under Section 6.
 
 Do not treat existing figures, caches, old results, or historical success records as evidence that the current code has passed validation. Existing changes belong to the user; preserve unrelated content.
 
 Results, logs, scripts, and partial inputs copied from a server or cluster form an existing analysis snapshot. Identify each file's role rather than treating the entire downloaded directory as input. An organization-only request does not default to deleting, renaming, rerunning, or regenerating existing results. Place files and restore an entry point supported by evidence under Sections 3-5. For a request to continue downstream analysis, reuse suitable existing results without incidental directory restructuring or upstream reruns.
 
-Resolve questions directly when file inspection and conversation context provide the answer. Use reasonable defaults for low-risk implementation choices that do not affect scientific meaning, and state them briefly. When missing information affects method selection or result interpretation, complete independent work before raising specific decisions that remain open.
+Clarify missing methods or parameters that affect scientific meaning before dependent computations; continue independent authorized work.
 
-Existing choices and valid approvals remain applicable. Follow actual requirements for charges, external uploads, installation, publication, and separate stage approvals; this skill does not expand authorization. An approval requirement blocks only actions that depend on it.
+Honor existing valid approvals and obtain any separately required approval for charges, external uploads, installation, publication, or stage execution. An unmet approval blocks only dependent actions.
 
 ### 2.2 Define Analysis Boundaries and Expected Products
 
-Define the question, input data, confirmed methods and key parameters, expected results, and necessary validation criteria. State these in the conversation if useful; no extra plan file is required.
+Define the question, input data, confirmed methods and key parameters, expected results, and necessary validation criteria. No separate plan file is required.
 
 Set the analysis start and end points before determining required inputs. Distinguish existing upstream products, the current steps, and subsequent steps. Check existing intermediate products for format, required fields, sample correspondence, and verifiable provenance. If a product meets the current input requirements, an entry point may start from it; state any limits on verification of its upstream source or version. Missing raw inputs outside the scope must not block downstream work. If the user explicitly requests full reproduction from raw data, do not reduce that scope without authorization.
 
-Block a dependent step only when an irreplaceable input, key parameter, or required step within the declared scope is missing and cannot be recovered through inspection. Distinguish unchecked items, verified absence, and permission or service errors. An unchecked environment is not evidence that execution is impossible. Continue authorized work independent of the blocker, and do not report partial workflow success as overall completion.
+Block a dependent step only when an irreplaceable input, key parameter, or required step within the declared scope is missing and cannot be recovered through inspection. Distinguish unchecked items, verified absence, and permission or service errors. An unchecked environment is not evidence that execution is impossible. Continue authorized work independent of the blocker; assess completion under Section 6.
 
 Each four-item layout records one analysis stage with defined inputs, an analysis objective, and target products that can be run and checked independently: `code.txt` processes A in `input/` to produce B in `output/`, with the process explained in `readme.md`. A stage may contain necessary sequential computations. Do not create a separate layout for every function, command, intermediate file, or rerun.
 
@@ -70,7 +70,7 @@ Create a separate four-item layout when another analysis takes completed, indepe
 
 Prefer editing the existing entry point and README. Change only what is necessary for the current objective. Unless the user requests structural organization, avoid incidental renaming, directory migration, script splitting, or refactoring unrelated analyses.
 
-When fixing similar issues, first scan for affected occurrences within the requested scope. If the user asks to fix all such issues, state the affected scope in the conversation and cover every affected result and panel after the repair. Preserve specified reference methods and parameters. If the reference code is questionable, explain the issue first; do not copy known errors to obtain a consistent appearance.
+When fixing similar issues, first scan for affected occurrences within the requested scope. If the user asks to fix all such issues, cover every affected result and panel after the repair. Preserve specified reference methods and parameters. If the reference code is questionable, explain the issue first; do not copy known errors to obtain a consistent appearance.
 
 ### 2.4 Execute and Validate
 
@@ -78,13 +78,11 @@ When the task includes running an analysis or rerunning after changes, use the p
 
 Check exit status, products from the current run, and content correctness relevant to the task under Section 6. If long computations require a cluster, additional charges, or specific approval, complete feasible checks and state what remains unverified. Job submission is not computation completion.
 
-For organization-only work on existing server analyses, check file placement, input references, execution wiring, available script or log evidence, and the README. Perform necessary static checks and preflight checks without analysis side effects on the adapted entry point; do not run the analysis solely to validate the entry point without authorization. Report organization, entry point adaptation, and the absence of a rerun separately. Historical products do not establish successful reproduction. If the entry point remains blocked, report partial completion under Section 6.
+For organization-only work on existing server analyses, check file placement, input references, execution wiring, available script or log evidence, and the README. Perform necessary static checks and preflight checks without analysis side effects on the adapted entry point; do not run the analysis solely to validate the entry point without authorization. Assess completion under Section 6; historical products do not establish successful reproduction.
 
 ### 2.5 Deliver
 
-State the status first, then briefly describe changes, actual execution scope, validation results, and unresolved items. Distinguish "completed," "delivered for acceptance," and "partially completed with blockers." Do not declare acceptance on the user's behalf when it has not occurred.
-
-Structure checks may pass while execution remains unverified. A successful run may still leave uncertainty in scientific interpretation. State these separately rather than combining partial successes into a claim of complete success.
+Deliver the requested code, documentation, or results with relevant validation evidence and unresolved limitations, using the criteria in Section 6.
 
 ## 3. Module Structure and Entry Points
 
@@ -120,7 +118,7 @@ When organizing existing scripts, adapt the stage's execution logic into `code.t
 
 When organizing existing server analyses, first verify scripts associated with the run. If no usable script is available, recover verifiable execution logic from software logs, job standard output, or command records. Original logs are products of the corresponding script run and belong in `output/`. Merge data and method explanations from scripts or configuration into the README. Do not assume the current script is the historical execution version without checking; missing historical logs do not automatically invalidate the current script's use. First check whether hardcoded paths and missing intermediate files can be resolved by connecting known inputs; do not immediately substitute a placeholder that stops execution.
 
-If logs or scripts cover only part of the historical steps, use Section 2.2 to determine whether they cover the stage's start and end points. Document missing upstream steps outside the scope in the README. If an irreplaceable input, parameter, or execution step remains missing within the scope, raise a specific error before the affected analysis starts. State what is missing and the conditions for recovery, and mark the status as "entry point not fully restored; execution unverified." A placeholder that exits unconditionally does not complete entry point adaptation. Recovering a command does not authorize deletion, upload, or installation operations found in the original records.
+If logs or scripts cover only part of the historical steps, use Section 2.2 to determine whether they cover the stage's start and end points. Document missing upstream steps outside the scope in the README. If an irreplaceable input, parameter, or execution step remains missing within the scope, raise a specific error before the affected analysis starts. Record the missing item and recovery conditions in the README, and assess adaptation and execution under Section 6. Recovering a command does not authorize deletion, upload, or installation operations found in the original records.
 
 Keep only one `readme.md` per stage, alongside the main entry point. Do not add module configuration or environment reports to record versions and environments. Prefer the project's configured environment or project-level environment location. Do not move, delete, or break existing tool-required resources such as `.Rprofile`, `renv.lock`, `renv/`, or `.venv` without authorization. Document their actual locations and use in the README. These are exceptions for preserving existing environments, not default grounds for creating extra files. Do not move package libraries or caches into `input/` or `output/`.
 
@@ -145,7 +143,7 @@ Identify file roles before organization and preserve raw data and necessary exec
 
 ### Environment, Parameters, and Randomness
 
-Before running analysis, read [Environment Checks and Recovery](references/environment.md) and follow its procedure to confirm the actual interpreter, dependencies, permissions, and availability. For R analyses, integrate `require_r_environment` from `scripts/r_environment.R` into the actual entry point, or use an existing equivalent project preflight check. Preserve original errors on failure; do not label every failure as a package library path issue. Follow the environment reference's failure procedure to check the actual interpreter, startup configuration, and active libraries, and merge diagnostic evidence into the existing README. Repair and recheck within existing authorization, then continue the analysis; do not end the task merely upon finding a missing package. Organization-only tasks do not authorize running analysis. Do not claim an issue is the "only blocker" without comprehensive preflight checks.
+Before running analysis, read [Environment Checks and Recovery](references/environment.md) and follow its procedure to confirm the actual interpreter, dependencies, permissions, and availability. For R analyses, integrate `require_r_environment` from `scripts/r_environment.R` into the actual entry point, or use an existing equivalent project preflight check. On failure, preserve the original error and follow the reference's recovery procedure to check the interpreter, startup configuration, active libraries, and required dependencies. Repair and recheck within existing authorization before resuming analysis. Record diagnostic evidence and unresolved dependencies in the existing README, distinguishing verified from unchecked prerequisites. Organization-only tasks do not authorize running analysis.
 
 Prefer reusing the project's venv, conda, renv, container, or lock files, and avoid arbitrary interpreter changes. Briefly record language runtimes, key software versions, and necessary dependencies in the README; continue maintaining existing environment files.
 
@@ -173,7 +171,7 @@ When restoring historical analyses, first seek the original run script, complete
 
 Do not create `runs/<date>/`, `runs/<run_id>/`, or other per-run directories. Do not accumulate complete copies of every run by default or add agent summaries, reviews, work records, run receipts, or management files such as `.analysis-state/`. Centralize version, environment, method, and process explanations in `readme.md`.
 
-For organization-only work with no existing results, `output/` may be empty. State "no existing results found; no results generated by execution." Do not run unauthorized computations to fill a directory, present inputs as results, or claim results have been delivered. If the user requests result generation, an empty directory is not completion. Statistically valid empty results still require Section 6 checks and must be distinguished from an unrun or failed analysis.
+For organization-only work with no existing results, `output/` may be empty; record the absence of existing or generated results in the README. Do not run unauthorized computations to fill a directory or present inputs as results. Distinguish statistically valid empty results from unrun or failed analyses using Section 6.
 
 When organizing existing analyses copied from a server or cluster, `output/` holds research results and the software logs, job standard output, and necessary error logs directly associated with that analysis. Put these logs in `output/`, without creating `logs/` or retaining them at the module root. For example:
 
@@ -207,7 +205,7 @@ Clean only temporary paths created for this run whose purpose has ended. Verify 
 
 ## 6. Validation and Completion Criteria
 
-Select necessary checks for the task's scale. Do not add unrelated tests to demonstrate thoroughness. Keep the checking process in the conversation by default, without extra review files.
+Select checks for the task's scale and main failure risks. Additional review files are subject to the delivery scope and Section 7.
 
 Check these states separately as the user requires; none substitutes for the others:
 
@@ -216,7 +214,7 @@ Check these states separately as the user requires; none substitutes for the oth
 - **Actual execution**: Authorized steps have run, and exit status and failure information have been checked.
 - **Result validation**: Expected products and necessary content checks pass, with old results clearly distinguished from current results.
 
-A placeholder entry point does not meet adaptation requirements. When result generation is required, products that have not been generated by execution or validated do not meet delivery requirements. If only structure checks pass, report the relevant state, such as "directory organization completed; entry point not yet adapted; analysis not run." If other requested work remains blocked, report overall partial completion.
+Completion requires all requested states to satisfy their criteria; record unrun steps and unresolved blockers. A placeholder entry point does not satisfy adaptation, and result generation requires executed, validated products. Passing structure checks alone leaves execution unverified.
 
 For organization-only server snapshots, verify that placement did not change existing file content, referenced locations and accessibility are recorded accurately, entry point commands are supported by original records, and missing items and conflicts are marked. Do not default to repeated full scans of large files merely to confirm placement. Select necessary checks for the actual operations. The following execution requirements apply to parts that involve reruns or new analyses.
 
@@ -244,13 +242,13 @@ When rendering is possible, check final figures for blank content, clipping, and
 
 Cover every affected panel when a repair affects multiple panels. Appearance-only changes do not require rerunning expensive upstream analysis, but confirm that reused data matches the current analysis version.
 
-Report the corresponding work as complete only when necessary execution and checks within the requested scope are finished. Plausible outputs that pass checks do not establish that a research hypothesis is true or that scientific conclusions are confirmed.
+Passing checks does not establish that a research hypothesis is true or that scientific conclusions are confirmed. A successful run may still leave uncertainty in scientific interpretation.
 
 ## 7. README and Necessary Records
 
 The README should let users understand the purpose, inputs, methods and parameters, environment and execution instructions, and results without reading the code.
 
-State the start and end points covered by the entry point, reused upstream products, and provenance limits. In Run, distinguish an adapted but unrun entry point, required dependency blockers, and verified execution. In Output, distinguish existing results, current-run results, and results not generated. Describe missing items only within their actual affected scope.
+State the start and end points covered by the entry point, reused upstream products, and provenance limits. In Run and Output, record the applicable status under Section 6, distinguish existing from current-run products, and describe missing items within their affected scope.
 
 Use these sections concisely when relevant; do not fill unrelated sections mechanically:
 
@@ -262,7 +260,7 @@ Run: Working directory, entry point command, software and package versions, requ
 Output: Core products and necessary interpretation, including valid empty results.
 ```
 
-For server snapshots, `readme.md` must also briefly record the following. In Input, distinguish local files, links, and inputs not downloaded; centralize key original server paths, sources, and access status. In Method, identify the existing script or log supplying commands or parameters. In Run, state the interpreter, working directory, overridable paths, and known missing dependencies; distinguish restored, not fully restored, and verified execution. In Output, list core results and corresponding logs. For information that existing records cannot establish, write "cannot be confirmed from existing records." Do not guess or create a separate provenance report.
+For server snapshots, `readme.md` must also briefly record the following. In Input, distinguish local files, links, and inputs not downloaded; centralize key original server paths, sources, and access status. In Method, identify the existing script or log supplying commands or parameters. In Run, state the interpreter, working directory, overridable paths, and known missing dependencies. In Output, list core results and corresponding logs. For information that existing records cannot establish, write "cannot be confirmed from existing records." Do not guess or create a separate provenance report.
 
 Do not explain code line by line, copy entire terminal logs, or write agent reasoning, self-checks, change reports, or "task completed" statements.
 
@@ -274,11 +272,9 @@ Distinguish program execution evidence from agent self-reports. Do not discard s
 
 ## 8. Internal Checks Before Delivery
 
-Confirm that task boundaries and reference methods were not changed without authorization, and raw data and unrelated changes are preserved. Establish the main entry point and environment. Complete necessary execution and content checks for executed parts; complete placement and evidence checks for organization-only parts and mark them as not rerun. Ensure the README matches actual methods and execution, outputs do not mix old and new results, and current temporary files are handled safely.
+Confirm that task boundaries and reference methods were not changed without authorization, and raw data and unrelated changes are preserved. Establish the main entry point and environment. Complete the applicable checks under Section 6. Ensure the README matches actual methods and execution, outputs do not mix old and new results, and current temporary files are handled safely.
 
-For new or organized stages, list top-level items including hidden items. Confirm `input/`, `output/`, `code.txt`, and `readme.md` are present; any other items must be existing environment metadata that must remain in place or explicitly requested exceptions. Check that `input/` contains only data or valid links, execution logic is centralized in `code.txt`, and explanations are in `readme.md`. Check that `output/` contains only stage script products, without default `runs/` history, management state, or agent records, and that staging files from successful runs have been removed. Missing inputs or logs-only snapshots do not justify omitting the four items. Passing structure checks does not establish that missing inputs have been supplied or the entry point has been fully reproduced.
-
-Check structure, entry point, execution, and result status separately under Section 6, then provide result locations, completion status, brief validation evidence, and remaining limits. The presence of all four names does not establish entry point usability. Do not generate another check report merely to demonstrate compliance with this convention.
+For new or organized stages, list top-level items including hidden items. Confirm `input/`, `output/`, `code.txt`, and `readme.md` are present; any other items must be existing environment metadata that must remain in place or explicitly requested exceptions. Check that `input/` contains only data or valid links, execution logic is centralized in `code.txt`, and explanations are in `readme.md`. Check that `output/` contains only stage script products, without default `runs/` history, management state, or agent records, and that staging files from successful runs have been removed. Missing inputs or logs-only snapshots do not justify omitting the four items.
 
 ## 9. Existing Runner Compatibility
 

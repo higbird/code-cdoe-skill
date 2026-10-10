@@ -45,7 +45,7 @@ Use the same skill directory with Claude Code, Codex, or NousResearch Hermes Age
 
 Project-level directories are `.claude/skills/` for Claude Code and `.agents/skills/` for Codex. Place the complete skill folder inside them. For a custom Hermes home or profile, use its active skills directory. `~` denotes the user home directory; Windows paths depend on client configuration. Sources: [Claude Code](https://code.claude.com/docs/en/skills), [Codex](https://learn.chatgpt.com/docs/build-skills), and [Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).
 
-An existing Codex installation already verified under `~/.codex/skills/` can remain there. Avoid multiple divergent copies for one client. After installation, start a new session and check the skill list and loaded path. Automatic selection also depends on client configuration and model behavior.
+Use the active skills directory configured for your client and avoid divergent copies. After installation, start a new session and check the skill list and loaded path. Automatic selection depends on client configuration and model behavior.
 
 Keep these resources together:
 
