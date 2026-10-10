@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Cdoe Skill"
-  short_description: "组织、运行和验证轻量可复现的科研数据分析项目与工作流"
-  default_prompt: "使用 $code-cdoe-skill 整理、运行并验证这个科研分析项目。"
+  short_description: "Organize, run, and verify research data analysis workflows"
+  default_prompt: "Use $code-cdoe-skill to organize, run, and verify this research analysis project."

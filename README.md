@@ -1,57 +1,53 @@
 # Code Cdoe Skill
 
-一套面向科研数据分析 Agent 的轻量工作规范，用四件套记录以 Bash、R、Python 完成的独立分析阶段：输入数据经 `code.txt` 生成输出，`readme.md` 说明数据、方法、参数、版本、环境与运行方式。仓库同时保留既有 Python 运行器的兼容工具。
+A workflow specification for script-based scientific data analysis. Each independent analysis stage uses `input/`, `output/`, `code.txt`, and `readme.md` to describe its inputs, execution, outputs, and methods. The repository also retains tools for existing runner-based workflows.
 
-*A lightweight Agent Skill for organizing, running, and validating reproducible scientific data-analysis projects.*
+## Capabilities
 
-## 功能
+- Organize each independently runnable and verifiable analysis stage with four entries.
+- Keep analysis and its diagnostic or result plots together; use a separate layout for independent downstream analyses.
+- Store only data or valid data links in `input/`, execution code in `code.txt`, and documentation in `readme.md`.
+- Keep `output/` flat by default, without accumulating per-run directories.
+- Protect raw data and preserve unrelated files and changes.
+- Run authorized analyses and check exit status, expected outputs, and relevant data content.
+- Avoid unnecessary summaries, reviews, logs, and agent work records.
 
-- 新建或整理时，每个可独立运行和检查的分析阶段对应一套 input/、output/、code.txt、readme.md。
-- 同阶段的分析和配套可视化可以合并；独立下游分析另建四件套，复用上游产物。
-- 输入只存数据或必要链接，运行代码集中于 code.txt，所有说明集中于 readme.md。
-- 输出默认平铺，只保留本阶段脚本产物，不默认积累 runs/ 历史目录。
-- 保护原始数据，使用明确的输入、输出和路径约定。
-- 维持一个清晰的运行入口，减少重复脚本和隐藏步骤。
-- 修改已有项目时控制范围，保留用户文件和无关改动。
-- 实际运行受影响的分析，并检查退出状态、产物及关键数据内容。
-- 避免生成无用途的总结、审查、日志和 Agent 工作记录。
+This skill governs workflow organization and validation. It does not replace statistical method selection, experimental design, domain interpretation, or scientific judgment.
 
-本 skill 管理分析工作流，不代替统计方法选择、实验设计、领域解释或人工科研判断。
+## Existing runner compatibility
 
-## 既有运行器兼容
+New stages run directly through `code.txt`; they do not require a runner, JSON configuration, auxiliary source directory, or persistent state. Copy the [synthetic example](assets/minimal/readme.md) and run `python code.txt` to generate a table and its plot.
 
-新建四件套直接通过 `code.txt` 运行，不要求运行器、JSON 配置、辅助源码目录或持久状态。可复制 [合成数据示例](assets/minimal/readme.md)，通过 `python code.txt` 同时生成表格与配套图件。
+`scripts/analysis_workflow.py` retains file checks, protected output replacement, run receipts, dependency planning, and recovery interfaces for existing workflows the user has authorized maintaining. It requires Python 3.11+ and uses only the standard library. See the [compatibility tool reference](references/tools.md). Its `input/workflow.json`, `input/src/`, and `output/.analysis-state/` layout is not a template for new stages.
 
-`scripts/analysis_workflow.py` 保留已有文件检查、安全替换、运行凭据、依赖计划及恢复接口，仅供用户明确授权继续维护的既有工作流使用。它需要 Python 3.11+ 标准库，详细接口及限制见 [兼容工具说明](references/tools.md)。不将其 `input/workflow.json`、`input/src/`、`output/.analysis-state/` 布局用于新四件套，也不因工具支持多阶段就合并独立分析。
+The runner does not isolate arbitrary script writes, keep all files atomically visible during replacement, or infer undeclared dependencies or scientific validity. Compatibility does not authorize migration, installation, or deletion of historical state.
 
-维护旧流程时继续核对必要依赖、实际执行、结果与恢复边界。工具不隔离任意脚本写入，不保证整组文件始终原子可见，也不推断未声明的依赖或科学口径；这些兼容能力不构成自动迁移、安装或删改历史状态的授权。
+## Use cases
 
-## 适用场景
+- Create a scientific analysis stage.
+- Organize an existing bioinformatics or statistical analysis directory.
+- Modify Bash, R, or Python scripts and regenerate affected results.
+- Repair tables or multi-panel figures and verify affected outputs.
+- Check consistency among documentation, code, parameters, and results.
+- Organize server or cluster snapshots: place actual inputs or links in `input/`, document external paths and access status in `readme.md`, and preserve results and associated software logs in `output/`. Recover `code.txt` from available scripts or logs. Organization alone does not authorize rerunning the analysis or guessing missing parameters.
 
-- 创建新的科研分析模块。
-- 整理结构混乱的生物信息学或统计分析目录。
-- 修改 Bash、R、Python 分析脚本并重新生成结果。
-- 修复表格或多面板图件，并验证全部受影响产物。
-- 核对 README、代码、参数和实际结果之间的一致性。
-- 整理服务器或集群已有分析：实际输入或链接归入 `input/`，输入位置、来源和可访问性直接记于 `readme.md`；结果与对应软件原生日志归入 `output/`，依据已有脚本或日志适配 `code.txt`；只整理时不重跑，不补猜缺失参数。
+Concept explanations, paper reading, and local code questions do not require this layout.
 
-单纯解释统计概念、阅读论文或回答局部代码问题时，不需要创建该 skill 规定的项目结构。
+## Installation and invocation
 
-## 安装与调用
+Use the same skill directory with Claude Code, Codex, or NousResearch Hermes Agent. Copy the complete `code-cdoe-skill` folder rather than only `SKILL.md`; avoid an extra nested folder with the same name.
 
-同一份目录适用于 Claude Code、Codex 和 NousResearch Hermes Agent。按使用的客户端复制整个 `code-cdoe-skill` 文件夹；不要只复制 `SKILL.md`，也不要再嵌套一层同名目录。
-
-| 客户端 | 默认个人安装目录 | 显式调用 |
+| Client | Default personal installation directory | Explicit invocation |
 |---|---|---|
-| Claude Code | `~/.claude/skills/code-cdoe-skill/` | `/code-cdoe-skill 请整理并验证这个科研分析项目。` |
-| Codex | `~/.agents/skills/code-cdoe-skill/` | `$code-cdoe-skill 请整理并验证这个科研分析项目。` |
-| Hermes Agent | `~/.hermes/skills/code-cdoe-skill/` | `/code-cdoe-skill 请整理并验证这个科研分析项目。` |
+| Claude Code | `~/.claude/skills/code-cdoe-skill/` | `/code-cdoe-skill Organize and validate this scientific analysis project.` |
+| Codex | `~/.agents/skills/code-cdoe-skill/` | `$code-cdoe-skill Organize and validate this scientific analysis project.` |
+| Hermes Agent | `~/.hermes/skills/code-cdoe-skill/` | `/code-cdoe-skill Organize and validate this scientific analysis project.` |
 
-Claude Code 项目级目录为 `.claude/skills/`，Codex 为 `.agents/skills/`，均在其中放置整个 skill 文件夹。Hermes 使用自定义 `HERMES_HOME` 或 profile 时，安装到该配置实际使用的 skills 目录。`~` 表示用户主目录；Windows 实际路径以客户端配置为准。目录与调用依据：[Claude Code 官方说明](https://code.claude.com/docs/en/skills)、[Codex 官方说明](https://learn.chatgpt.com/docs/build-skills)、[Hermes 官方说明](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/)。
+Project-level directories are `.claude/skills/` for Claude Code and `.agents/skills/` for Codex. Place the complete skill folder inside them. For a custom Hermes home or profile, use its active skills directory. `~` denotes the user home directory; Windows paths depend on client configuration. Sources: [Claude Code](https://code.claude.com/docs/en/skills), [Codex](https://learn.chatgpt.com/docs/build-skills), and [Hermes](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills/).
 
-已有 Codex 环境若已从 `~/.codex/skills/` 加载此 skill，可沿用当前已验证的目录；不要为同一客户端保留多个不同版本的同名副本。复制后新建会话并检查技能列表及实际加载路径；能否自动触发还取决于客户端配置和模型选择。
+An existing Codex installation already verified under `~/.codex/skills/` can remain there. Avoid multiple divergent copies for one client. After installation, start a new session and check the skill list and loaded path. Automatic selection also depends on client configuration and model behavior.
 
-安装后应保留以下结构：
+Keep these resources together:
 
 ```text
 code-cdoe-skill/
@@ -70,37 +66,35 @@ code-cdoe-skill/
 └── tests/
 ```
 
-`agents/openai.yaml` 仅提供 Codex 的可选界面元数据；Claude Code 和 Hermes 的执行不依赖它。共用指令只使用标准的 `name`、`description` 元数据。无须安装 OpenAI、Anthropic 或 Hermes SDK；运行器仅依赖 Python 标准库。
+`agents/openai.yaml` provides optional Codex interface metadata. Claude Code and Hermes do not depend on it. Shared instructions use the standard `name` and `description` fields; no OpenAI, Anthropic, or Hermes SDK is required. See the [host adaptation guide](references/agents.md) for environment handling, command quoting, and client verification.
 
-详细环境处理、命令引用和验收步骤见 [宿主适配说明](references/agents.md)。
+## Examples
 
-## 使用示例
-
-以下任务正文可接在对应客户端的显式调用后，也可直接用自然语言提出。
+Append these requests to the client's explicit skill invocation, or use them as natural-language requests:
 
 ```text
-使用 code-cdoe-skill，为这批 GWAS 输入建立一个可重复运行的分析模块，生成关联结果和 Manhattan 图。
+Use code-cdoe-skill to build a runnable GWAS stage from these inputs, generating association results and a Manhattan plot.
 ```
 
 ```text
-使用 code-cdoe-skill，修复当前 R 分析的所有分组标签问题，重跑受影响的表格和图，并确认结果来自本次运行。
+Use code-cdoe-skill to fix all group-label errors in this R analysis, rerun affected tables and plots, and verify that they came from the current run.
 ```
 
 ```text
-使用 code-cdoe-skill，检查 README 与代码中的 FDR、协变量和 PC 数是否一致；能确认的直接修正并重跑，影响科学含义但无法判断的冲突请指出。
+Use code-cdoe-skill to check whether the README and code agree on FDR, covariates, and PC counts. Correct confirmed inconsistencies and rerun affected results. Report unresolved conflicts that affect scientific meaning.
 ```
 
-例如整理服务器下载的 `result.assoc` 与 `result.log`：
+For server results such as `result.assoc` and `result.log`:
 
 ```text
-使用 code-cdoe-skill，在当前目录整理这批服务器分析材料，建立本阶段的 input/、output/、code.txt、readme.md。实际输入或链接放在 input/，结果和对应软件日志放在 output/，恢复可确认的 code.txt；输入位置与访问状态、方法参数、软件版本和环境直接写入 readme.md。只整理，不重跑；缺失步骤和参数明确标注。
+Use code-cdoe-skill to organize these server analysis files as input/, output/, code.txt, and readme.md. Keep actual inputs or links in input/, results and associated software logs in output/, and recover the supported execution logic in code.txt. Document input locations and access status, methods, parameters, versions, and the environment in readme.md. Organize only; do not rerun. Identify missing steps and parameters.
 ```
 
-这一能力由 Agent 按技能规范读取记录完成，运行器不会自动解析任意软件日志。整理完成不代表历史分析已经复现；日志不完整时也不承诺生成完整可执行入口。
+The agent reads and interprets the available records; the runner does not parse arbitrary software logs. Organization does not establish historical reproducibility, and incomplete logs may not support a complete executable entry point.
 
-## 分析阶段交付结构
+## Analysis stage layout
 
-新建或整理一个分析阶段时，目标目录保留以下四项；这不改变上面的 skill 安装包结构。用户指定在 `a/` 整理单个阶段时直接使用 `a/`，不另建一层模块目录：
+A new or reorganized stage uses these four entries. This requirement applies to analysis stages, not the skill package. When the user specifies a single stage directory `a/`, use it directly:
 
 ```text
 a/
@@ -110,33 +104,33 @@ a/
 └── readme.md
 ```
 
-| 项目 | 内容 |
+| Entry | Contents |
 |---|---|
-| `input/` | 实际输入数据或必要的有效数据链接。 |
-| `code.txt` | 本阶段可直接执行的运行脚本及必要执行参数。 |
-| `output/` | 本阶段脚本生成的结果、图件及确有需要的软件原生产物。 |
-| `readme.md` | 数据说明、方法与参数说明、软件及包版本、依赖环境和运行方式。 |
+| `input/` | Actual input data or necessary valid data links. |
+| `code.txt` | The directly executable stage script and necessary execution parameters. |
+| `output/` | Results, plots, and necessary native software outputs generated by the stage script. |
+| `readme.md` | Data descriptions, methods and parameter explanations, software and package versions, dependencies, environment, and run instructions. |
 
-不新建 `input/src/`、`config.json`、`workflow.json`、`paths.md` 或重复环境报告。执行逻辑并入 `code.txt`，说明并入 `readme.md`；脚本不需要解析 README 作为配置。Bash、R 或 Python 入口分别使用 `bash code.txt`、`Rscript code.txt` 或 `python code.txt`，实际工作目录和解释器由 README 声明。
+Do not create `input/src/`, `config.json`, `workflow.json`, `paths.md`, or duplicate environment reports. Consolidate execution logic in `code.txt` and explanations in `readme.md`; the script should not parse the README as configuration. Use `bash code.txt`, `Rscript code.txt`, or `python code.txt` as appropriate, with the working directory and interpreter documented in the README.
 
-没有本地输入时仍保留 `input/`，在 README 的 Input 段记录有依据的原路径、来源和当前可访问性。只有相对路径且无法确认原工作目录时原样记录并说明限制，不编造绝对路径、数据或链接。
+Keep `input/` even when inputs are unavailable locally. Record supported original paths, sources, and access status in the README. Preserve unresolved relative paths as recorded; do not invent absolute paths, data, or links.
 
-`output/` 默认平铺，不建立 `runs/<日期>/`、`runs/<编号>/` 或管理状态目录，不额外存放 Agent 总结、审查或工作记录。重复运行更新对应产物，成功后清理本次暂存与临时恢复副本；失败时保护上次有效结果，不在运行前清空整个输出。软件本身必需的结果目录结构按真实要求保留并说明。
+Keep `output/` flat by default. Do not create `runs/<date>/`, `runs/<id>/`, management state directories, or agent summaries and work records. Reruns update the relevant outputs; remove temporary staging and recovery copies after success. Protect previous valid results on failure, and do not clear the entire output directory before running. Preserve directory structures required by the analysis software and document them.
 
-阶段边界按输入、目标和产物确定。同阶段的必要计算、诊断图和结果图可以合并，例如单细胞基础处理、聚类及配套 UMAP，或差异表达及对应图件。后续以已完成结果为输入，开展可独立运行和检查的另一项分析时，另建四件套，例如差异表达后的功能富集、已有细胞对象后的拟时序或细胞通讯。下游在自己的 `input/` 复用上游产物；函数多、图多或保存中间文件不自动要求拆分，也不为缩减目录把整条独立分析链装进一个大脚本。
+Define stages by inputs, objectives, and outputs. Necessary calculations and associated plots can share a stage, such as single-cell preprocessing and clustering with QC and UMAP plots, or differential expression with its result plots. A downstream analysis that independently uses completed upstream results gets a separate layout, such as enrichment, trajectory inference, or cell communication analysis. Use upstream results through the downstream `input/`. Function count, figure count, and saved intermediate files alone do not require splitting; fewer directories alone do not justify combining independent analyses.
 
-只修改、诊断或重跑已有项目而未要求整理时，保留原有有效入口与布局。已有必须原位保留的环境资源不擅自搬动或删除，位置和使用方式写入 README；不为说明环境而新建额外模块文件。整理前先识别归属，保留原始数据和运行证据；尚有不能安全归位的原文件时，说明结构限制，不宣称四件套已达标。
+For modification, diagnosis, or rerunning without a request to reorganize, preserve the existing valid entry point and layout. Do not move or delete required existing environment resources; document their locations and use. Organization must preserve raw data and execution evidence. Report unresolved file placement or structural constraints rather than claiming the layout is complete.
 
-## 许可证
+## License
 
-本项目采用 [MIT License](LICENSE)。
+This project uses the [MIT License](LICENSE).
 
-## 环境适配
+## Environment and validation
 
-运行前按 [环境检查与恢复](references/environment.md) 选择实际解释器并预检。R 辅助脚本 `scripts/r_environment.R` 提供逐包诊断、失败阻断及显式安装缺失包；不自动安装 R 或恢复锁文件。安装与分析使用相同 R 和包库。已有项目环境优先，不把示例包变成通用依赖。
+Follow the [environment guide](references/environment.md) to select the actual interpreter and check dependencies. `scripts/r_environment.R` provides per-package diagnostics, failure blocking, and explicitly authorized installation of missing packages. It does not install R or automatically restore a lockfile. Use the same R executable and library configuration for installation and analysis; prefer the existing project environment.
 
-R 测试通过 PATH 的 Rscript 或测试专用 `TEST_RSCRIPT` 定位；未提供 R 时明确 skip。目录搬迁测试不代表跨系统或客户端端到端验证。
+R tests locate Rscript through `PATH` or the test-specific `TEST_RSCRIPT`. They report a skip when R is unavailable. Directory relocation tests do not establish cross-system or client end-to-end compatibility.
 
-验证入口为 `python -B -m unittest discover -s tests -v`。新示例测试检查搬迁后直接执行、结果内容、输出平铺与重复运行；运行器测试用于验证既有接口兼容，R 测试验证预检与失败阻断。测试通过不代表真实联网安装、跨系统或客户端端到端验收；库安装失败通过模拟离线安装器检查。
+Run tests with `python -B -m unittest discover -s tests -v`. Example tests cover relocation, direct execution, result content, flat outputs, and reruns. Runner tests cover existing interfaces; R tests cover preflight checks and failure blocking. A simulated offline installer tests installation failure handling, not live network installation.
 
-本次验证环境为 Windows、Python 3.11.9、R 4.5.2：66 项测试中 65 项通过，1 项因系统不允许创建符号链接而跳过，包含 8 项 R 预检测试。Skill 元数据校验通过；单细胞基础分析与已有差异结果后继续富集两个场景完成只读规则检查。
+Recorded validation used Windows, Python 3.11.9, and R 4.5.2: 65 of 66 tests passed, with one skipped because the system did not permit symbolic links. This includes eight R preflight tests. Skill metadata validation passed. A read-only review covered single-cell basic analysis and enrichment from existing differential-expression results. These checks do not establish macOS/Linux support, live installation behavior, or client end-to-end acceptance.

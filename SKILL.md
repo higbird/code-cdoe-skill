@@ -1,94 +1,94 @@
 ---
 name: code-cdoe-skill
-description: 用 input/、output/、code.txt、readme.md 四件套记录可独立运行和检查的科研分析阶段。适用于创建或整理分析模块、维护 Bash/R/Python 脚本、重跑结果、恢复有依据的分析入口和修复图件；同阶段分析与配套可视化可以合并，独立下游分析另建四件套。强调输入仅存数据、单脚本执行、README 集中说明、输出精简、原始数据保护和实际验证。单纯解释概念、阅读论文或回答局部代码问题时不建立项目结构。
+description: Organize research analysis stages that can be run and checked independently with input/, output/, code.txt, and readme.md. Use to create or organize analysis modules, maintain Bash/R/Python scripts, rerun results, restore entry points from evidence, or repair figures. Analysis and its supporting plots can share a stage; independent downstream analyses need separate four-item layouts. Keep inputs limited to data, execution in one script, documentation in the README, and outputs concise. Protect raw data and verify actual execution. Do not create project structures for concept explanations, paper reading, or local code questions.
 ---
 
-# 轻量科研分析工作流
+# Lightweight Research Analysis Workflow
 
-帮助科研人员和小型团队使用编码 Agent 完成结构清楚、可重复运行、结果经过验证的数据分析。适用于生物信息学、统计分析及其他以脚本为主的科研任务。
+Help researchers and small teams use coding agents for clearly organized data analysis that can be rerun and whose results are checked. Suitable for bioinformatics, statistical analysis, and other research tasks based primarily on scripts.
 
-本 skill 负责项目组织、执行约束和交付验证；不单独提供统计方法选择、实验设计或学科解释的专业依据。运行通过不能替代科学判断。
+This skill covers project organization, execution constraints, and delivery checks. It does not independently establish the scientific basis for statistical method selection, experimental design, or domain interpretation. Successful execution does not replace scientific judgment.
 
-## 宿主与路径
+## Hosts and Paths
 
-同一份 skill 用于 Claude Code、Codex 和 Hermes Agent。通过宿主提供的文件读取、编辑及终端能力执行，不依赖特定工具名、模型、插件或客户端 SDK。使用当前项目的环境；可选运行器要求 Python 3.11+，R、Bash 及分析依赖按项目需要确认。
+The same skill supports Claude Code, Codex, and Hermes Agent. Use the host's file reading, editing, and terminal capabilities without relying on specific tool names, models, plugins, or client SDKs. Use the current project's environment. The optional runner requires Python 3.11+; confirm R, Bash, and analysis dependencies as the project requires.
 
-以当前实际加载的 `SKILL.md` 所在目录作为 `<skill>`，按它解析 `scripts/`、`references/`、`assets/`；不要把 skill 安装目录当作分析项目。模块根是本阶段的四件套目录，`code.txt` 使用 README 声明的工作目录解析输入和输出。路径含空格时按当前 shell 正确引用，不能假定终端是 Bash。
+Use the directory of the currently loaded `SKILL.md` as `<skill>` and resolve `scripts/`, `references/`, and `assets/` from it. Do not treat the skill installation directory as the analysis project. The module root is the stage's four-item directory; `code.txt` resolves inputs and outputs from the working directory declared in the README. Quote paths containing spaces correctly for the current shell; do not assume the terminal uses Bash.
 
-执行前确认终端所在环境能访问 skill 资源、项目和解释器。远程、容器或沙箱中的路径可能与加载 skill 的宿主不同；路径不可见时先解决授权范围内的资源映射，再执行。缺少执行能力或权限时完成可行的检查，并明确未运行的部分，不把描述或加载成功当作执行成功。安装、调用和三端验收步骤见 [宿主适配说明](references/agents.md)。
+Before execution, confirm that the terminal environment can access skill resources, the project, and the interpreter. Paths in remote environments, containers, or sandboxes may differ from those on the host that loaded the skill. If paths are unavailable, resolve resource mapping within the authorized scope before execution. If execution capabilities or permissions are missing, complete feasible checks and state which parts were not run. A description or successful loading is not evidence of successful execution. See [Host Integration](references/agents.md) for installation, invocation, and acceptance checks across the three hosts.
 
-## 1. 目标与优先级
+## 1. Goals and Priorities
 
-在满足任务的前提下，使用最简单的方案，保留最少但足够的文件。结构服务于科研分析，不为规范、审查或汇报制造额外工作。
+Use the simplest approach that meets the task and retain the fewest files sufficient for it. Structure serves the analysis; do not create extra work solely for conventions, review, or reporting.
 
-在遵守上级指令和权限边界的前提下，按以下顺序处理取舍：
+Subject to higher-priority instructions and permission boundaries, resolve tradeoffs in this order:
 
-1. 用户授权范围、原始数据安全和结果正确性。
-2. 用户已确认的方法、参数、参考版本及适用的项目约定。
-3. 可重复执行、必要的结果追溯和验证。
-4. 结构简单、文件精简和命名统一。
+1. User authorization, raw data protection, and result correctness.
+2. User-confirmed methods, parameters, reference versions, and applicable project conventions.
+3. Repeatable execution, necessary result provenance, and validation.
+4. Simple structure, concise file sets, and consistent naming.
 
-用户确认的方法若存在明显问题，应说明证据和影响；既不静默改用其他方法，也不把有疑问的方法执行结果宣称为可靠结论。
+If a user-confirmed method has a clear problem, explain the evidence and implications. Do not silently substitute another method or present results from a questionable method as reliable conclusions.
 
-文件少不是省略必要依赖、失败证据、数据版本或验证的理由；数据、方法、版本、环境和必要证据的说明集中在 `readme.md`，实际输入和脚本产物按第 3 节归位。四项顶层结构适用于新建模块和用户明确要求整理的目标目录；只修改、诊断或重跑已有项目时，不擅自扩大为目录重构。
+Fewer files do not justify omitting required dependencies, failure evidence, data versions, or validation. Keep explanations of data, methods, versions, environments, and necessary evidence in `readme.md`; place actual inputs and script products as specified in Section 3. The four-item top-level layout applies to new modules and directories the user explicitly asks to organize. Modifying, diagnosing, or rerunning an existing project does not authorize directory restructuring.
 
-## 2. 工作流程
+## 2. Workflow
 
-### 2.1 识别任务与当前状态
+### 2.1 Identify the Task and Current State
 
-先核对用户目标、目标目录、指定参考文件、已有入口、输入和输出状态，以及项目运行环境。
+Check the user's objective, target directory, specified reference files, existing entry points, input and output status, and project environment.
 
-大型项目先读 README、已有输入清单和浅层目录，只定位当前任务所需文件。不要默认递归遍历原始数据目录、向对话输出完整大表，或把全文件行数统计当成低成本检查。按需读取表头、指定区域及必要统计；科学上必需的全量验证仍应执行。
+For large projects, first read the README, existing input manifests, and a shallow directory listing. Locate only files needed for the current task. Do not default to recursively traversing raw data directories, printing entire large tables in the conversation, or treating full-file line counts as inexpensive checks. Read headers, selected regions, and necessary statistics as needed; still perform full validation when scientifically required.
 
-区分当前请求：创建分析、修改实现、重跑结果、整理结构，或仅解释与诊断。只解释或诊断时保持只读；用户要求修复或整理时，在对应授权范围内修改。用户只要求代码草稿或规范文档时，交付对应内容并说明未执行分析，无需为了验证另造科研任务。
+Distinguish requests to create an analysis, modify implementation, rerun results, organize structure, or only explain and diagnose. Stay read-only for explanation or diagnosis. Make requested repairs or organizational changes within the corresponding authorization. If the user requests only draft code or a specification, deliver that content and state that the analysis was not run; do not invent a research task for validation.
 
-“整理四件套”包括归位文件并按第 3 节适配有依据的入口，不自动授权运行分析；“适配可运行入口”要求完成声明范围内的代码调度与必要预检；“运行并生成结果”还要求实际执行和结果验证。不能用目录齐全代替入口适配，也不能为填充空目录扩大执行范围。
+"Organize the four-item layout" includes placing files and adapting an entry point supported by evidence under Section 3; it does not automatically authorize running the analysis. "Adapt a runnable entry point" requires connecting the execution logic and completing necessary preflight checks within the declared scope. "Run and generate results" also requires actual execution and result validation. A complete directory layout cannot substitute for entry point adaptation, and empty directories do not justify expanding execution scope.
 
-不要把现有图片、缓存、旧结果或历史成功记录当作当前代码已通过验证的证据。已有修改属于用户，保留无关内容。
+Do not treat existing figures, caches, old results, or historical success records as evidence that the current code has passed validation. Existing changes belong to the user; preserve unrelated content.
 
-从服务器或集群复制回来的结果、日志、脚本和部分输入属于“已有分析快照”，先识别各文件角色，不把整个下载目录都当作输入。只要求整理时，不默认删除、改名、重跑或重新生成已有结果；按第 3–5 节归位文件并恢复有证据的入口。只要求继续下游分析时复用适用的已有结果，不顺便重构目录或重跑上游。
+Results, logs, scripts, and partial inputs copied from a server or cluster form an existing analysis snapshot. Identify each file's role rather than treating the entire downloaded directory as input. An organization-only request does not default to deleting, renaming, rerunning, or regenerating existing results. Place files and restore an entry point supported by evidence under Sections 3-5. For a request to continue downstream analysis, reuse suitable existing results without incidental directory restructuring or upstream reruns.
 
-能通过文件检查和会话上下文解决的问题直接解决。对不影响科学含义的低风险实现选择，采用合理默认并简要说明。缺失信息影响方法选择或结果解释时，完成不依赖它的工作，再提出具体待决事项。
+Resolve questions directly when file inspection and conversation context provide the answer. Use reasonable defaults for low-risk implementation choices that do not affect scientific meaning, and state them briefly. When missing information affects method selection or result interpretation, complete independent work before raising specific decisions that remain open.
 
-已有选择和有效批准继续适用；收费、外部上传、安装、发布及独立阶段审批按实际要求处理，不由本 skill 扩大授权。审批只阻塞依赖它的动作。
+Existing choices and valid approvals remain applicable. Follow actual requirements for charges, external uploads, installation, publication, and separate stage approvals; this skill does not expand authorization. An approval requirement blocks only actions that depend on it.
 
-### 2.2 确定分析边界与预期产物
+### 2.2 Define Analysis Boundaries and Expected Products
 
-明确该分析回答的问题、输入数据、已确认的方法和关键参数、预期结果以及必要验证标准。可在对话中说明，无需新增计划文件。
+Define the question, input data, confirmed methods and key parameters, expected results, and necessary validation criteria. State these in the conversation if useful; no extra plan file is required.
 
-先确定分析起点和终点，再判断必要输入：区分已有上游产物、本次步骤和后续步骤。检查现有中间产物的格式、必要字段、样本对应关系及可核实的来源；满足本次输入要求时，可从该产物建立入口，并注明上游来源或版本的验证限制。不能因范围之外的原始输入缺失而阻断后续流程；用户明确要求从原始数据完整复现时，也不能擅自缩小范围。
+Set the analysis start and end points before determining required inputs. Distinguish existing upstream products, the current steps, and subsequent steps. Check existing intermediate products for format, required fields, sample correspondence, and verifiable provenance. If a product meets the current input requirements, an entry point may start from it; state any limits on verification of its upstream source or version. Missing raw inputs outside the scope must not block downstream work. If the user explicitly requests full reproduction from raw data, do not reduce that scope without authorization.
 
-只有声明范围内不可替代的输入、关键参数或必要步骤缺失，且无法通过检查恢复时，才阻断依赖它的步骤。区分未检查、已核实缺失、权限或服务错误；环境尚未检查不等于无法运行。继续不依赖阻塞项的已授权工作，不把部分流程成功声称为整体完成。
+Block a dependent step only when an irreplaceable input, key parameter, or required step within the declared scope is missing and cannot be recovered through inspection. Distinguish unchecked items, verified absence, and permission or service errors. An unchecked environment is not evidence that execution is impossible. Continue authorized work independent of the blocker, and do not report partial workflow success as overall completion.
 
-每套四件套记录一个具有明确输入、分析目标和目标产物，可独立运行和检查的分析阶段：`input/` 中的 A 经 `code.txt` 处理，在 `output/` 中生成 B，过程由 `readme.md` 说明。一个阶段允许包含必要的连续计算；不是每个函数、命令或中间文件各建一套，也不是每次重跑新建一套。
+Each four-item layout records one analysis stage with defined inputs, an analysis objective, and target products that can be run and checked independently: `code.txt` processes A in `input/` to produce B in `output/`, with the process explained in `readme.md`. A stage may contain necessary sequential computations. Do not create a separate layout for every function, command, intermediate file, or rerun.
 
-同一阶段的计算、诊断图和结果图可以合并。例如单细胞基础处理、降维聚类及配套质控图、UMAP 图可以由同一 `code.txt` 完成；差异表达分析和对应结果图也可以同套交付。图多或需要调整配色，不自动触发拆分。
+Computations, diagnostic plots, and result figures for the same stage may be combined. For example, basic single-cell processing, dimensionality reduction, clustering, and supporting QC and UMAP plots can share one `code.txt`. Differential expression and its result plots can also share one layout. A large number of figures or a palette adjustment does not automatically require splitting a stage.
 
-后续以已完成、可独立复用的上游结果为输入，开展需要独立运行和检查的另一项分析时，另建四件套。例如差异表达结果后的功能富集、已完成细胞对象后的拟时序或细胞通讯分析，以及 GWAS 后的 COJO，按各自输入与目标产物组织。下游在自己的 `input/` 中使用上游产物或有效链接。不能仅为缩减目录或凑成一个脚本，将这些独立阶段串成一个大四件套；同一脚本也可能包含多个应拆开的独立分析。
+Create a separate four-item layout when another analysis takes completed, independently reusable upstream results as input and needs independent execution and checking. Examples include functional enrichment after differential expression, pseudotime or cell communication analysis from a completed cell object, and COJO after GWAS. Organize each by its own inputs and target products. Downstream stages use upstream products or valid links in their own `input/`. Do not combine these independent stages into one large layout merely to reduce directories or fit everything into one script. A single script may itself contain independent analyses that should be separated.
 
-### 2.3 实施最小修改
+### 2.3 Make Minimal Changes
 
-优先修改现有入口和 README，只改变实现当前目标所必需的部分。除非用户要求整理结构，否则不顺便改名、迁移目录、拆脚本或重构无关分析。
+Prefer editing the existing entry point and README. Change only what is necessary for the current objective. Unless the user requests structural organization, avoid incidental renaming, directory migration, script splitting, or refactoring unrelated analyses.
 
-修复同类问题时先扫描请求范围内的命中项。用户要求解决“所有”同类问题时，在对话中列清影响范围，修复后覆盖全部受影响结果和面板。保持指定参考方法与参数；参考代码自身存在疑点时先说明，不能为取得一致外观而复制已知错误。
+When fixing similar issues, first scan for affected occurrences within the requested scope. If the user asks to fix all such issues, state the affected scope in the conversation and cover every affected result and panel after the repair. Preserve specified reference methods and parameters. If the reference code is questionable, explain the issue first; do not copy known errors to obtain a consistent appearance.
 
-### 2.4 实际执行与验证
+### 2.4 Execute and Validate
 
-当任务包含执行分析或修改后重跑时，按 README 声明的工作目录和入口，使用项目指定环境执行分析。语法检查、静态解析和 dry run 仅是预检，不能替代实际运行。
+When the task includes running an analysis or rerunning after changes, use the project's specified environment, working directory, and entry point declared in the README. Syntax checks, static parsing, and dry runs are preflight checks, not substitutes for actual execution.
 
-验证退出状态、本次产物以及任务相关的内容正确性，具体遵循第 6 节。长时间计算若需集群、额外费用或专门审批，应完成可进行的检查并说明尚未验证的部分；提交作业不等于计算完成。
+Check exit status, products from the current run, and content correctness relevant to the task under Section 6. If long computations require a cluster, additional charges, or specific approval, complete feasible checks and state what remains unverified. Job submission is not computation completion.
 
-只整理服务器已有分析时，检查文件归位、输入引用、入口调度、可用的脚本或日志依据及 README；对适配的入口做必要的静态检查和无分析副作用的预检，不为验证入口擅自运行分析。分别说明结构整理、入口适配和未重新运行的状态，不据历史产物声称复现成功；入口仍受阻时按第 6 节报告部分完成。
+For organization-only work on existing server analyses, check file placement, input references, execution wiring, available script or log evidence, and the README. Perform necessary static checks and preflight checks without analysis side effects on the adapted entry point; do not run the analysis solely to validate the entry point without authorization. Report organization, entry point adaptation, and the absence of a rerun separately. Historical products do not establish successful reproduction. If the entry point remains blocked, report partial completion under Section 6.
 
-### 2.5 交付
+### 2.5 Deliver
 
-先给明确状态，再简述修改、实际执行范围、验证结果和未解决项。区分“已完成”“已交付待验收”“部分完成、存在阻塞”；验收未发生时不代替用户宣布验收通过。
+State the status first, then briefly describe changes, actual execution scope, validation results, and unresolved items. Distinguish "completed," "delivered for acceptance," and "partially completed with blockers." Do not declare acceptance on the user's behalf when it has not occurred.
 
-结构检查可以通过但运行仍未验证；运行成功也可能仍有科学解释不确定性。分别陈述，不将部分成功合并成完整成功。
+Structure checks may pass while execution remains unverified. A successful run may still leave uncertainty in scientific interpretation. State these separately rather than combining partial successes into a claim of complete success.
 
-## 3. 模块结构与运行入口
+## 3. Module Structure and Entry Points
 
-新建或整理分析阶段时，模块根目录保留四项，说明文件统一使用小写 `readme.md`。用户指定在 `a/` 内整理，就直接以 `a/` 为本阶段根；确有多个独立阶段时分别建立四件套，不把多套合成一个总调度模块。没有指定目录时，可按流程编号并使用短名称：
+When creating or organizing an analysis stage, keep four items at the module root and use lowercase `readme.md` for documentation. If the user specifies organization within `a/`, use `a/` directly as the stage root. Use separate four-item layouts for independent stages rather than combining them into a general orchestration module. If no directory is specified, short names with workflow numbers may be used:
 
 ```text
 03_GWAS/
@@ -107,75 +107,75 @@ description: 用 input/、output/、code.txt、readme.md 四件套记录可独�
 └── readme.md
 ```
 
-- `input/`：仅放本阶段的实际输入数据或必要的有效数据链接。
-- `code.txt`：仅放本阶段可直接执行的运行脚本，以及执行所必需的参数、路径处理与检查。
-- `output/`：仅放本阶段脚本生成的结果、图件及确有需要的软件原生产物。
-- `readme.md`：集中记录数据说明、分析方法与参数说明、软件及包版本、依赖环境和运行方式，也说明目标产物、来源与验证限制。
+- `input/`: Only actual input data for this stage or necessary valid data links.
+- `code.txt`: Only the directly executable stage script, with parameters, path handling, and checks required for execution.
+- `output/`: Only results, figures, and necessary native software products generated by the stage script.
+- `readme.md`: Central documentation for data, analysis methods and parameters, software and package versions, environment dependencies, and execution instructions, including target products, provenance, and validation limits.
 
-`input/` 和 `output/` 即使暂无数据或结果也要存在。没有本地输入时，在 `readme.md` 中记录有依据的输入位置和可访问性，不生成说明文件或假数据来填充 `input/`。不新建 `input/src/`、`config.json`、`workflow.json`、`paths.md` 或环境说明文件：辅助执行逻辑并入 `code.txt`，说明信息并入 `readme.md`。README 是供人阅读的说明，不要求脚本解析 Markdown 作为配置。
+Keep `input/` and `output/` even when data or results are unavailable. If there are no local inputs, record input locations supported by evidence and their accessibility in `readme.md`; do not fill `input/` with explanatory files or fake data. Do not create `input/src/`, `config.json`, `workflow.json`, `paths.md`, or environment documentation files. Incorporate helper execution logic into `code.txt` and explanations into `readme.md`. The README is documentation for people; scripts need not parse Markdown as configuration.
 
-`code.txt` 必须能按 README 声明的解释器直接运行。已有 Bash 时可用 `bash code.txt`，纯 R 或 Python 分析可用 `Rscript code.txt` 或 `python code.txt`。一个入口可以执行本阶段必要的连续处理及配套可视化；涉及独立下游分析时按第 2.2 节拆分。不能只写让用户手动复制的命令，或只包装对 `input/src/` 中脚本的调用。
+`code.txt` must run directly with the interpreter declared in the README. Use `bash code.txt` when Bash is available, or `Rscript code.txt` or `python code.txt` for pure R or Python analyses. One entry point may perform the stage's necessary sequential processing and supporting visualization. Split independent downstream analyses under Section 2.2. Do not provide only commands for the user to copy manually or a wrapper that merely invokes scripts in `input/src/`.
 
-整理现有脚本时，在授权范围内将本阶段执行逻辑适配到 `code.txt`，保持已确认的分析方法和参数，不为统一结构重写分析算法。只修改、诊断或重跑且未要求整理时，保留已有有效入口与布局。已有 workflow manager、包结构或必须原位保留的资源不因本规范自动获得重构授权；若无法安全转成四件套，说明受影响范围与结构限制。
+When organizing existing scripts, adapt the stage's execution logic into `code.txt` within the authorized scope. Preserve confirmed methods and parameters; do not rewrite analysis algorithms to standardize structure. For modification, diagnosis, or reruns without an organization request, retain existing valid entry points and layouts. This convention does not authorize refactoring existing workflow managers, package structures, or resources that must remain in place. If conversion to the four-item layout cannot be done safely, explain the affected scope and structural constraints.
 
-整理服务器已有分析时，优先核对关联到该次运行的脚本；没有可用脚本时，从软件日志、作业标准输出或命令记录恢复可确认的执行逻辑。原日志属于对应脚本运行的产物，保留在 `output/`；脚本、配置中的数据与方法说明合入 README。不把当前脚本未经核对地当作历史执行版本，缺少历史日志也不自动否定当前脚本的用途。硬编码路径和缺失中间文件先检查能否由已知输入衔接解决，不直接换成停止占位文件。
+When organizing existing server analyses, first verify scripts associated with the run. If no usable script is available, recover verifiable execution logic from software logs, job standard output, or command records. Original logs are products of the corresponding script run and belong in `output/`. Merge data and method explanations from scripts or configuration into the README. Do not assume the current script is the historical execution version without checking; missing historical logs do not automatically invalidate the current script's use. First check whether hardcoded paths and missing intermediate files can be resolved by connecting known inputs; do not immediately substitute a placeholder that stops execution.
 
-日志或脚本只覆盖部分历史步骤时，按第 2.2 节判断能否覆盖本阶段的起点与终点。范围外缺失的上游步骤在 README 中说明；范围内仍缺少不可替代的输入、参数或执行逻辑时，在受影响分析开始前具体报错，写明缺项和恢复条件，并标注“入口未完整恢复、未验证运行”。无条件退出的占位文件不算入口适配完成。恢复命令不等于授权执行原记录中的删除、上传或安装操作。
+If logs or scripts cover only part of the historical steps, use Section 2.2 to determine whether they cover the stage's start and end points. Document missing upstream steps outside the scope in the README. If an irreplaceable input, parameter, or execution step remains missing within the scope, raise a specific error before the affected analysis starts. State what is missing and the conditions for recovery, and mark the status as "entry point not fully restored; execution unverified." A placeholder that exits unconditionally does not complete entry point adaptation. Recovering a command does not authorize deletion, upload, or installation operations found in the original records.
 
-每阶段只保留一个与主入口同级的 `readme.md`。不为记录版本和环境新增模块配置或环境报告；优先使用项目已配置环境或项目级环境位置。已有工具必需的 `.Rprofile`、`renv.lock`、`renv/`、`.venv` 等不可擅自搬动、删除或破坏，实际位置与使用方式写入 README；它们是既有环境保留例外，不是新建额外文件的默认依据。包库和缓存不搬进 `input/` 或 `output/`。
+Keep only one `readme.md` per stage, alongside the main entry point. Do not add module configuration or environment reports to record versions and environments. Prefer the project's configured environment or project-level environment location. Do not move, delete, or break existing tool-required resources such as `.Rprofile`, `renv.lock`, `renv/`, or `.venv` without authorization. Document their actual locations and use in the README. These are exceptions for preserving existing environments, not default grounds for creating extra files. Do not move package libraries or caches into `input/` or `output/`.
 
-整理前先识别文件角色，保留原始数据及必要运行证据。无法确定归属、有独立保留要求或属于无关任务的原文件，不随意塞进输入或结果，也不为凑齐结构删除。存在尚未安全解决的原文件时如实说明，不宣称四件套已经达标。
+Identify file roles before organization and preserve raw data and necessary execution evidence. Do not arbitrarily place original files with unclear ownership, separate retention requirements, or unrelated task roles into inputs or results; do not delete them to force the layout. If original files remain unresolved, report that accurately rather than claiming the four-item requirements are met.
 
-## 4. 输入、路径与可复现性
+## 4. Inputs, Paths, and Reproducibility
 
-### 输入与路径
+### Inputs and Paths
 
-- `input/` 仅包含本阶段的实际输入数据和必要的有效数据链接；不放源码、配置、数据说明、环境说明、本阶段结果或运行临时文件。外部输入的位置与来源直接写入 `readme.md`。
-- 文件角色由模块边界决定：清洗表是清洗模块的输出，也可作为从清洗后数据开始的 GWAS 模块的输入；覆盖清洗步骤的模块不能把自身清洗结果统称为输入。不为填满目录重复复制或改判文件角色。
-- 不擅自覆盖、删除、重命名或修改用户原始数据。清洗和转换写入派生产物。
-- 项目内数据路径相对模块目录或既有项目根目录解析，基准在 README 中明确。
-- 外部软件优先通过已配置环境定位；必须使用绝对安装路径时集中配置，不能散落在脚本中。软件安装路径与项目数据路径区别处理。
-- 跨模块小文件可复制；大型基因型文件、测序文件或矩阵优先使用链接，检查目标可访问且不会被写入。
-- 链接不可用时采用环境支持的引用方式，并说明位置与来源；涉及显著存储或复制成本且未获授权时，先确认再复制。
-- 整理服务器快照时，将实际使用且当前可获得、体积合理的小型输入归入 `input/`，不改变内容。大型输入当前可访问时优先在 `input/` 建链接；链接不可用时保留已核实的外部引用，不为目录统一强制复制。
-- 输入未下载、当前找不到或仍依赖外部位置时，将有依据的引用集中写入 `readme.md` 的 Input 段。逐项注明输入用途或文件名、原路径、来源脚本或日志及可定位位置、已核实的本地路径或覆盖方式、当前可访问性；未检查时写“未验证”，不能写成可访问。记录的是输入路径，不是日志自身路径。
-- 只有日志而没有本地输入时，仍建立 `input/`，在 `readme.md` 保留上述信息；不创建假数据、空数据占位文件或失效链接。原记录只有相对路径且无法确认当时工作目录时，原样记录并注明“无法解析绝对路径”；日志完全未提供输入位置时写“现有记录无法确认”，不补猜。文件名前缀按原软件要求保留，并核对所需配套文件。
-- `code.txt` 对本地输入使用相对于声明项目根的路径；外部输入路径集中配置并允许通过现有参数或环境变量覆盖。原服务器路径只能作为有来源的默认值，运行前检查实际输入可访问；可覆盖路径不代表已具备本机执行环境。
-- 链接到上游输出不代表输入版本已固定。需要复现历史结果时，保留明确的数据版本、校验信息或适当快照。
+- `input/` contains only actual stage input data and necessary valid data links. It excludes source code, configuration, data or environment documentation, stage results, and execution temporary files. Document external input locations and provenance directly in `readme.md`.
+- Module boundaries determine file roles. A cleaned table is an output of a cleaning module and may be an input to a GWAS module starting from cleaned data. A module that includes cleaning cannot label its own cleaned results as inputs. Do not duplicate files or change their roles to fill directories.
+- Do not overwrite, delete, rename, or modify the user's raw data without authorization. Write cleaning and transformations to derived products.
+- Resolve project data paths relative to the module directory or existing project root, and state the base in the README.
+- Prefer locating external software through the configured environment. If absolute installation paths are required, configure them centrally rather than scattering them throughout the script. Treat software installation paths separately from project data paths.
+- Small files may be copied between modules. Prefer links for large genotype files, sequencing files, or matrices; check that targets are accessible and will not be written to.
+- If links are unavailable, use a reference mechanism supported by the environment and document the location and source. Confirm before copying when significant storage or copy costs are involved and have not been authorized.
+- When organizing server snapshots, place small inputs that were actually used, are currently available, and are reasonable in size into `input/` without changing their content. For accessible large inputs, prefer links in `input/`. If links are unavailable, retain verified external references rather than forcing copies for directory consistency.
+- For inputs not downloaded, not currently found, or still located externally, centralize references supported by evidence in the Input section of `readme.md`. For each item, record its purpose or filename, original path, source script or log and a locatable position within it, verified local path or override mechanism, and current accessibility. Use "unverified" for unchecked accessibility; do not label it accessible. Record the input path, not the log's own path.
+- If only logs are available and no local inputs exist, still create `input/` and retain the information above in `readme.md`. Do not create fake data, empty data placeholders, or broken links. If an original record provides only a relative path and its working directory cannot be confirmed, preserve the path and mark "absolute path cannot be resolved." If logs provide no input location, write "cannot be confirmed from existing records" rather than guessing. Preserve filename prefixes required by the original software and check required companion files.
+- In `code.txt`, use paths relative to the declared project root for local inputs. Configure external input paths centrally and allow overrides through existing parameters or environment variables. Original server paths may serve only as defaults supported by provenance; check actual input accessibility before running. Overridable paths do not establish that the local execution environment is available.
+- A link to upstream output does not fix the input version. To reproduce historical results, retain explicit data versions, checksums or other verification information, or suitable snapshots.
 
-### 环境、参数和随机性
+### Environment, Parameters, and Randomness
 
-执行分析前读取 [环境检查与恢复](references/environment.md)，按其中流程确认实际解释器、依赖、权限及可用性。R 分析在实际入口中接入 `scripts/r_environment.R` 的 `require_r_environment`（或项目已有等效预检）；失败保留原始错误，不统称为包库路径问题；按环境参考中的失败流程核对实际解释器、启动配置与活动库，并把诊断依据合入现有 README。已有授权范围内修复、复检后继续分析，不在仅发现缺包时结束任务；仅整理任务不擅自运行分析，未经全面预检不声称“唯一阻塞”。
+Before running analysis, read [Environment Checks and Recovery](references/environment.md) and follow its procedure to confirm the actual interpreter, dependencies, permissions, and availability. For R analyses, integrate `require_r_environment` from `scripts/r_environment.R` into the actual entry point, or use an existing equivalent project preflight check. Preserve original errors on failure; do not label every failure as a package library path issue. Follow the environment reference's failure procedure to check the actual interpreter, startup configuration, and active libraries, and merge diagnostic evidence into the existing README. Repair and recheck within existing authorization, then continue the analysis; do not end the task merely upon finding a missing package. Organization-only tasks do not authorize running analysis. Do not claim an issue is the "only blocker" without comprehensive preflight checks.
 
-优先复用项目已有 venv、conda、renv、容器或锁文件，避免随意切换解释器。将语言运行时、关键软件版本和必要依赖简记于 README；已有环境文件继续维护。
+Prefer reusing the project's venv, conda, renv, container, or lock files, and avoid arbitrary interpreter changes. Briefly record language runtimes, key software versions, and necessary dependencies in the README; continue maintaining existing environment files.
 
-版本、依赖和环境信息集中记于 `readme.md`，不在 `code.txt` 放版本清单或环境说明，也不新建 `input/` 下的环境配置或重复报告。执行所需的导入、依赖预检和路径处理仍属于运行脚本。已有环境工具和锁文件按原约定使用；用户明确要求新增锁文件、容器或投稿复现材料时，在对应授权范围内处理并说明结构例外。未验证跨环境复现时，不作跨环境保证。
+Centralize version, dependency, and environment information in `readme.md`. Do not place version inventories or environment explanations in `code.txt`, or create environment configuration under `input/` or duplicate reports. Imports, dependency preflight checks, and path handling needed for execution remain part of the script. Use existing environment tools and lock files according to project conventions. When the user explicitly requests new lock files, containers, or reproduction materials for submission, work within that authorization and explain the structural exception. Do not promise reproduction across environments without verifying it.
 
-执行参数以 `code.txt` 中的必要参数或它接受的命令行参数为可维护来源，不另建 `config.json` 或 `workflow.json`。阈值、协变量、PC 数、窗口、置换次数、线程数和随机种子的说明记于 `readme.md`，并与实际脚本同步。
+Maintain execution parameters in `code.txt` or the command-line parameters it accepts; do not add `config.json` or `workflow.json`. Document thresholds, covariates, PC counts, windows, permutation counts, thread counts, and random seeds in `readme.md`, keeping them synchronized with the actual script.
 
-随机抽样、数据划分、置换、bootstrap 等步骤明确设置并记录种子。固定种子不能保证所有硬件和并行实现逐位一致；需要时使用数值容差，并说明未控制的非确定性。
+Explicitly set and record seeds for random sampling, data splits, permutations, bootstrap, and similar steps. Fixed seeds do not guarantee bitwise identity across hardware and parallel implementations. Use numerical tolerances where needed and state uncontrolled nondeterminism.
 
-### 参数冲突
+### Parameter Conflicts
 
-代码表明其编写的执行逻辑，不能单独证明历史上实际执行了什么，也不能证明应该执行什么。
+Code shows the execution logic it contains. It cannot alone prove what was historically executed or what should be executed.
 
-发现 README、代码、配置或结果说明不一致时，核对当前用户要求、已确认方法与指定参考版本。能够确定意图时，修正错误来源、同步说明；任务包含重跑时重跑受影响结果，只整理历史分析时记录差异，不篡改历史日志或重新生成结果。无法确定且差异影响科学含义时，暂停依赖该决定的计算，提出具体冲突；其他已授权工作继续。
+When the README, code, configuration, or result explanations conflict, check the current user request, confirmed methods, and specified reference version. If intent can be established, correct the erroneous source and synchronize documentation. Rerun affected results when the task includes rerunning. For organization-only work on historical analyses, record differences without altering historical logs or regenerating results. If intent is unclear and the difference affects scientific meaning, pause computations that depend on the decision and identify the specific conflict; continue other authorized work.
 
-例如：README 写 FDR < 0.05，代码写 P < 0.05，应核对用户确认的检验口径，不能直接把 README 改成代码中的口径来消除冲突。
+For example, if the README states FDR < 0.05 and the code uses P < 0.05, check the user-confirmed testing criterion. Do not simply change the README to match the code to remove the conflict.
 
-恢复历史分析时，优先查找原运行脚本、软件日志中的完整命令、作业提交脚本，其次核对 README 或配置；结果文件只作辅助证据，不用于猜测原参数。来源是否对应同一次运行比固定排序更重要：核对可用的作业标识、输出前缀、路径、版本及时间记录，时间戳不能单独证明关联。来源互相冲突且无法判断时，明确冲突与“现有记录无法确认”，不机械认定脚本一定比实际运行日志可靠。
+When restoring historical analyses, first seek the original run script, complete commands in software logs, and job submission scripts, then check the README or configuration. Results provide supporting evidence only; do not use them to guess original parameters. Association with the same run matters more than a fixed source ranking. Check available job identifiers, output prefixes, paths, versions, and time records; timestamps alone do not prove association. If conflicting sources cannot be resolved, state the conflict and "cannot be confirmed from existing records." Do not assume a script is always more reliable than the actual execution log.
 
-## 5. 结果保留、复用与安全更新
+## 5. Result Retention, Reuse, and Safe Updates
 
-### 有用产物
+### Useful Products
 
-`output/` 仅保留本阶段 `code.txt` 生成的科研结果、下游需要的结果、有明确复用价值的中间产物、图件和确有需要的软件原生输出。默认直接平铺。软件自身必须使用目录结构时保留其必要结构并在 README 说明；图多或文件多不自动产生额外分层。
+`output/` retains only research results, downstream inputs, intermediates with clear reuse value, figures, and necessary native software outputs generated by the stage's `code.txt`. Keep files directly in this directory by default. Preserve directory structures required by the software and explain them in the README. Many figures or files do not automatically justify additional nesting.
 
-不创建 `runs/<日期>/`、`runs/<运行编号>/` 或其他逐次运行目录，不默认积累每次运行的完整副本，也不添加 Agent 总结、审查、工作记录、运行凭据或 `.analysis-state/` 等管理文件。版本、环境、方法与过程说明集中在 `readme.md`。
+Do not create `runs/<date>/`, `runs/<run_id>/`, or other per-run directories. Do not accumulate complete copies of every run by default or add agent summaries, reviews, work records, run receipts, or management files such as `.analysis-state/`. Centralize version, environment, method, and process explanations in `readme.md`.
 
-只整理且没有已有结果时，允许 `output/` 为空，须明确“未发现已有结果，未运行生成”。不能为填充目录擅自计算、将输入冒充结果，或声称结果已交付。用户要求生成结果时，空目录不能代表完成；统计上合理的空结果仍需按第 6 节验证，不能与未运行或运行失败混淆。
+For organization-only work with no existing results, `output/` may be empty. State "no existing results found; no results generated by execution." Do not run unauthorized computations to fill a directory, present inputs as results, or claim results have been delivered. If the user requests result generation, an empty directory is not completion. Statistically valid empty results still require Section 6 checks and must be distinguished from an unrun or failed analysis.
 
-对从服务器或集群复制回来的已有分析进行模块整理时，`output/` 同时保存科研结果及与该次分析直接对应的软件日志、作业标准输出和必要错误日志。这些日志统一归入 `output/`，不额外建立 `logs/`，也不留在模块根目录；例如：
+When organizing existing analyses copied from a server or cluster, `output/` holds research results and the software logs, job standard output, and necessary error logs directly associated with that analysis. Put these logs in `output/`, without creating `logs/` or retaining them at the module root. For example:
 
 ```text
 output/
@@ -183,109 +183,109 @@ output/
 └── result.log
 ```
 
-只归位已确认属于目标分析的文件，不合并无关任务或不同运行的证据。同名冲突时保留双方，按可追溯的运行标识在 `output/` 内区分，不能覆盖其中一份。软件原生产物和日志保留原文件名；只有明确冲突或用户要求时才调整名称，并在现有 README 说明对应关系。此规则不要求重构任务范围之外的普通项目日志目录。
+Place only files confirmed to belong to the target analysis. Do not combine unrelated tasks or evidence from different runs. For filename conflicts, retain both files and distinguish them within `output/` using traceable run identifiers; do not overwrite either. Preserve original filenames for native software products and logs. Rename only for a confirmed conflict or user request, and document the mapping in the existing README. This rule does not require restructuring ordinary project log directories outside the task scope.
 
-新增产物使用最短可辨识名称，例如 `assoc.tsv`、`sig.tsv`、`manhattan.pdf`。避免重复模块名称，也避免 `a.tsv`、`1.pdf`。不使用 `new/fixed/final` 及其组合管理迭代。
+Use short, identifiable names for new products, such as `assoc.tsv`, `sig.tsv`, and `manhattan.pdf`. Avoid repeating the module name or using ambiguous names such as `a.tsv` or `1.pdf`. Do not manage iterations with `new/fixed/final` or combinations of these labels.
 
-图片格式服从用户及实际用途；无明确要求时优先选择 PDF 或 PNG 中适合的一种。需要编辑或投稿的其他格式按需求提供，不批量生成无用格式。
+Follow the user's requirements and actual use when choosing figure formats. If unspecified, prefer whichever of PDF or PNG is suitable. Provide other formats as needed for editing or submission; do not generate batches of unused formats.
 
-### 多数据集与多参数分析
+### Multiple Datasets and Parameter Sets
 
-方法和输入格式一致时复用代码。只替换输入适用于不需保留旧结果的串行任务；同一阶段确需同时比较多个队列、批次、模型或参数时，默认用有科研含义的文件名区分，例如 `assoc_discovery.tsv` 与 `assoc_replication.tsv`，不以运行日期或编号建立历史目录。
+Reuse code when methods and input formats match. Replacing only the input suits sequential tasks that do not need to retain old results. When a stage must compare multiple cohorts, batches, models, or parameter sets at once, distinguish them by scientifically meaningful filenames such as `assoc_discovery.tsv` and `assoc_replication.tsv`. Do not create history directories based on run dates or numbers.
 
-标识需能对应输入和实际参数，不因复用代码覆盖仍需比较的结果。多次比较优先共用入口及明确参数，只有独立科研任务才新增模块。版本保留服从用户要求；不要为普通修复制造整套项目副本。
+Identifiers must map to inputs and actual parameters. Code reuse must not overwrite results still needed for comparison. Prefer a shared entry point with explicit parameters for repeated comparisons; create new modules only for independent research tasks. Follow the user's version-retention requirements, and do not create whole-project copies for routine repairs.
 
-### 更新已有结果
+### Updating Existing Results
 
-重复运行更新本阶段对应的目标产物，覆盖前明确本次负责生成哪些结果，以及需要保持一致的结果集合。需要安全替换时，在本次独占的临时位置生成、验证，再替换正式产物；成功后清理本次暂存和临时恢复副本，不将暂存变成永久 `runs/` 历史。不要在每次运行开头清空整个 `output/`，也不删除无关或仍需比较的结果。
+A rerun updates the stage's corresponding target products. Before overwriting, establish which results the run will generate and which result set must remain consistent. When protected replacement is needed, generate and validate products in a temporary location exclusive to the current run, then replace the final products. After success, clean up staging files and temporary recovery copies rather than retaining them as permanent `runs/` history. Do not empty all of `output/` at the start of each run or delete unrelated results or results still needed for comparison.
 
-需要同时更新的表格、图件及对应软件日志作为一组处理，不把旧日志配给新结果。多文件逐个替换不天然具备原子性；必要时使用可回退的替换方式，避免对外呈现新旧混合的一组结果。只为本次可能被替换的有效产物保留临时恢复副本，成功后清理。
+Treat tables, figures, and corresponding software logs that need simultaneous updates as a group. Do not pair old logs with new results. Replacing multiple files one by one is not inherently atomic. Use a recoverable replacement approach when necessary to avoid presenting a mixture of old and new results. Keep temporary recovery copies only for valid products that may be replaced by this run, and clean them up after success.
 
-失败时保留上次有效结果，明确它们属于旧运行。已有流程无法隔离输出时，先采用适当保护和本次产物识别措施，并如实说明恢复或验证限制，不能声称已实现不存在的回退保证。
+On failure, preserve the last valid results and identify them as belonging to an older run. If an existing workflow cannot isolate outputs, first apply suitable protection and identify current-run products. State recovery and validation limits accurately; do not claim rollback guarantees that have not been implemented.
 
-只清理本次创建且用途已结束的临时路径。删除前核实目标，不按文件名中的 `tmp`、`old`、`log` 等关键词批量删除用户文件。未完成故障定位时保留必要证据，避免清理破坏诊断。执行明确授权的删除后核对残留并说明恢复条件。
+Clean only temporary paths created for this run whose purpose has ended. Verify targets before deletion; do not bulk-delete user files based on keywords such as `tmp`, `old`, or `log` in filenames. Preserve necessary evidence while diagnosis is incomplete so cleanup does not obstruct it. After explicitly authorized deletion, check remaining files and state recovery conditions.
 
-## 6. 分层验证与完成标准
+## 6. Validation and Completion Criteria
 
-按任务规模选择必要检查，不为展示完整性添加无关测试。检查过程默认留在对话，不新增审查文件。
+Select necessary checks for the task's scale. Do not add unrelated tests to demonstrate thoroughness. Keep the checking process in the conversation by default, without extra review files.
 
-按用户要求分别核对以下状态，不以其中一项替代其他项：
+Check these states separately as the user requires; none substitutes for the others:
 
-- **结构整理**：文件归位、内容保留，引用与可访问性如实记录。
-- **入口适配**：现有脚本已连接为声明范围内的有效调度，路径、任务选择和依赖检查已适配；静态检查通过但未运行时明确说明，不声称运行成功。
-- **实际运行**：已授权步骤实际执行，退出状态及失败信息已检查。
-- **结果验证**：预期产物及必要内容检查通过，旧结果与本次结果明确区分。
+- **Structure organization**: Files are placed appropriately, content is preserved, and references and accessibility are recorded accurately.
+- **Entry point adaptation**: Existing scripts are connected into valid execution logic for the declared scope, with paths, task selection, and dependency checks adapted. If static checks pass but execution has not occurred, state that without claiming successful execution.
+- **Actual execution**: Authorized steps have run, and exit status and failure information have been checked.
+- **Result validation**: Expected products and necessary content checks pass, with old results clearly distinguished from current results.
 
-占位入口不满足入口适配要求；要求生成结果时，未运行或未验证的产物不满足结果交付要求。仅结构通过时，报告“目录整理完成，入口尚未适配，分析未运行”等对应状态；用户要求的其他部分尚有阻塞时，整体报告部分完成。
+A placeholder entry point does not meet adaptation requirements. When result generation is required, products that have not been generated by execution or validated do not meet delivery requirements. If only structure checks pass, report the relevant state, such as "directory organization completed; entry point not yet adapted; analysis not run." If other requested work remains blocked, report overall partial completion.
 
-对仅整理的服务器快照，验证现有文件内容未因归位改变、引用位置及可访问性如实记录、入口中命令有原记录依据、缺项与冲突已标注。不要为确认大文件归位默认重复全量扫描；按实际操作选择必要检查。下列本次执行要求适用于发生重跑或新分析的部分。
+For organization-only server snapshots, verify that placement did not change existing file content, referenced locations and accessibility are recorded accurately, entry point commands are supported by original records, and missing items and conflicts are marked. Do not default to repeated full scans of large files merely to confirm placement. Select necessary checks for the actual operations. The following execution requirements apply to parts that involve reruns or new analyses.
 
-### 执行与产物
+### Execution and Products
 
-- 检查主进程和被调程序的错误，避免错误被捕获后继续运行却报告成功。
-- 确认预期结果集合由本次运行产生，核对缺失、非空和零字节数量。临时输出位置、运行前后对比等可帮助识别本次产物；时间戳单独不足以证明正确性。
-- 明确合理的空结果。例如无显著关联时，仅有表头的 `sig.tsv` 可以有效，不能为通过非空检查编造记录。
-- 未重新生成的旧结果、只验证的子集、异常退出后的残留产物，都不能代表完整成功。
+- Check errors from the main process and called programs. Do not report success after catching errors and continuing execution.
+- Confirm that the expected result set was generated by the current run, and check counts of missing, nonempty, and zero-byte files. Temporary output locations and before/after comparisons can help identify current products; timestamps alone do not establish correctness.
+- Identify valid empty results. For example, a header-only `sig.tsv` may be valid when no significant associations are found. Do not fabricate records to pass a nonempty-file check.
+- Old results not regenerated, partially checked subsets, and residual products from abnormal exits cannot establish complete success.
 
-### 数据与统计内容
+### Data and Statistical Content
 
-选择能发现本任务主要错误的少量检查，例如：
+Choose a small set of checks that can detect the main errors relevant to the task, for example:
 
-- 样本 ID 唯一性、样本匹配、分组标签以及输入输出样本数。
-- 必需列、缺失值、无穷值、单位、取值范围及输出结构。
-- 实际检验口径、阈值与已确认参数的一致性。
-- 已知参考结果或数值容差；仅在需要确认重复性时重复运行。
+- Sample ID uniqueness, sample matching, group labels, and input/output sample counts.
+- Required columns, missing and infinite values, units, value ranges, and output structure.
+- Consistency of actual testing criteria, thresholds, and confirmed parameters.
+- Known reference results or numerical tolerances; rerun only when repeatability needs to be checked.
 
-不要预设显著性、预期方向或特定样本数来强迫结果符合猜想。验证标准来自输入契约、方法要求或可靠参考。
+Do not presuppose significance, effect direction, or a particular sample count to force results to fit a hypothesis. Validation criteria come from input requirements, method requirements, or reliable references.
 
-### 图件
+### Figures
 
-能够渲染时检查最终图是否空白、截断、缺面板，核对坐标、单位、分组及图中统计与结果表的一致性。无法视觉检查时明确已验证的部分与剩余限制。
+When rendering is possible, check final figures for blank content, clipping, and missing panels. Verify axes, units, groups, and consistency between figure statistics and result tables. If visual inspection is unavailable, state what was checked and the remaining limits.
 
-修复影响多个面板时覆盖全部受影响面板；纯外观修改不要求重跑昂贵的上游分析，但需确认沿用的数据与当前分析版本相符。
+Cover every affected panel when a repair affects multiple panels. Appearance-only changes do not require rerunning expensive upstream analysis, but confirm that reused data matches the current analysis version.
 
-只有请求范围内的必要执行与检查完成，才能报告对应工作已完成。输出合理且通过检查，也不等于研究假设成立或科学结论已获确认。
+Report the corresponding work as complete only when necessary execution and checks within the requested scope are finished. Plausible outputs that pass checks do not establish that a research hypothesis is true or that scientific conclusions are confirmed.
 
-## 7. README 与必要记录
+## 7. README and Necessary Records
 
-README 让用户不读代码也能理解：做什么、输入是什么、用什么方法和参数、在哪个环境如何运行、得到哪些结果。
+The README should let users understand the purpose, inputs, methods and parameters, environment and execution instructions, and results without reading the code.
 
-明确入口覆盖的起点与终点、复用的上游产物及来源限制；Run 区分入口已适配但未运行、必要依赖阻塞和已验证运行，Output 区分已有结果、本次结果及未生成结果。缺项只注明实际受影响范围。
+State the start and end points covered by the entry point, reused upstream products, and provenance limits. In Run, distinguish an adapted but unrun entry point, required dependency blockers, and verified execution. In Output, distinguish existing results, current-run results, and results not generated. Describe missing items only within their actual affected scope.
 
-建议按以下内容简写，不机械填充无关栏目：
+Use these sections concisely when relevant; do not fill unrelated sections mechanically:
 
 ```text
-Purpose：分析问题与适用范围。
-Input：必需文件、关键格式、数据来源或版本。
-Method：已确认方法、实际参数及其在 code.txt 中的位置或传参方式。
-Run：工作目录、入口命令、软件及包版本、必要环境与依赖。
-Output：核心产物及必要解释，包括合理空结果。
+Purpose: Analysis question and scope.
+Input: Required files, key formats, data sources or versions.
+Method: Confirmed methods, actual parameters, and their location in code.txt or how they are passed.
+Run: Working directory, entry point command, software and package versions, required environment and dependencies.
+Output: Core products and necessary interpretation, including valid empty results.
 ```
 
-服务器快照的 `readme.md` 还需简记：Input 中区分本地文件、链接和未下载输入，集中记录关键原服务器路径、来源和访问状态；Method 中说明命令或参数来自哪个已有脚本或日志；Run 中写明解释器、工作目录、可覆盖路径及已知缺失依赖，区分已恢复、未完整恢复和已验证运行；Output 中列出核心结果及对应日志。无法从现有记录确认的信息写“现有记录无法确认”，不得补猜，也不另建追溯报告。
+For server snapshots, `readme.md` must also briefly record the following. In Input, distinguish local files, links, and inputs not downloaded; centralize key original server paths, sources, and access status. In Method, identify the existing script or log supplying commands or parameters. In Run, state the interpreter, working directory, overridable paths, and known missing dependencies; distinguish restored, not fully restored, and verified execution. In Output, list core results and corresponding logs. For information that existing records cannot establish, write "cannot be confirmed from existing records." Do not guess or create a separate provenance report.
 
-不逐行解释代码，不复制完整终端日志，不写 Agent 思考、自我检查、修改汇报或“任务完成”说明。
+Do not explain code line by line, copy entire terminal logs, or write agent reasoning, self-checks, change reports, or "task completed" statements.
 
-默认不生成 `review.md`、`audit.md`、`summary.md`、`report.md`、`checklist.md`、`agent_log.md`、重复环境报告或额外运行日志。这是对无用新增产物的限制，不是删除既有文件或免除明确交付要求的授权。
+Do not generate `review.md`, `audit.md`, `summary.md`, `report.md`, `checklist.md`, `agent_log.md`, duplicate environment reports, or extra execution logs by default. This limits unnecessary new products; it does not authorize deleting existing files or waiving explicit delivery requirements.
 
-数据说明、字段定义、参数说明、版本、环境和必要诊断依据优先合入 `readme.md`。软件原生日志属于实际脚本产物，可以保留在 `output/`，不能将 Agent 工作记录当作程序产物。用户明确要求独立审查报告、正式数据字典或投稿复现材料时，按指定用途和位置交付，说明这是明确要求的结构例外；不据此默认扩展所有四件套。
+Prefer merging data descriptions, field definitions, parameter explanations, versions, environments, and necessary diagnostic evidence into `readme.md`. Native software logs are actual script products and may remain in `output/`; agent work records are not program products. If the user explicitly requests an independent review report, formal data dictionary, or reproduction materials for submission, deliver them for the specified purpose and location, and explain the explicitly requested structural exception. Do not extend all four-item layouts on that basis.
 
-程序执行证据与 Agent 自述区别处理。软件日志、失败诊断、必要校验信息不能仅因属于“记录文件”被丢弃。
+Distinguish program execution evidence from agent self-reports. Do not discard software logs, failure diagnostics, or necessary verification information merely because they are record files.
 
-## 8. 交付前内部核对
+## 8. Internal Checks Before Delivery
 
-确认任务边界和参考方法未被擅自改变，原始数据与无关修改保留；主入口及环境明确；发生执行的部分完成必要运行和内容验证，纯整理部分完成归位与证据核对并标明未重跑；README 与实际方法和运行方式一致；输出没有新旧混杂；本次临时文件得到安全处理。
+Confirm that task boundaries and reference methods were not changed without authorization, and raw data and unrelated changes are preserved. Establish the main entry point and environment. Complete necessary execution and content checks for executed parts; complete placement and evidence checks for organization-only parts and mark them as not rerun. Ensure the README matches actual methods and execution, outputs do not mix old and new results, and current temporary files are handled safely.
 
-对新建或整理的阶段，列出包含隐藏项在内的顶层目录，确认包含 `input/`、`output/`、`code.txt`、`readme.md`，其余仅为必须原位保留的既有环境元数据或明确要求的例外。核对 `input/` 仅存数据或有效链接，执行逻辑集中于 `code.txt`，说明集中于 `readme.md`；`output/` 仅为本阶段脚本产物，无默认 `runs/` 历史、管理状态或 Agent 记录，成功运行后的本次暂存已经清理。输入缺失或仅有日志也不省略四项；结构通过不代表缺失输入已补齐或入口已完整复现。
+For new or organized stages, list top-level items including hidden items. Confirm `input/`, `output/`, `code.txt`, and `readme.md` are present; any other items must be existing environment metadata that must remain in place or explicitly requested exceptions. Check that `input/` contains only data or valid links, execution logic is centralized in `code.txt`, and explanations are in `readme.md`. Check that `output/` contains only stage script products, without default `runs/` history, management state, or agent records, and that staging files from successful runs have been removed. Missing inputs or logs-only snapshots do not justify omitting the four items. Passing structure checks does not establish that missing inputs have been supplied or the entry point has been fully reproduced.
 
-按第 6 节分别核对结构、入口、运行和结果状态，再向用户提供结果位置、完成状态、简要验证证据及剩余限制。入口可用性不能仅通过四项名称齐全判定。不要为了证明遵守本规范，再额外生成一份检查报告。
+Check structure, entry point, execution, and result status separately under Section 6, then provide result locations, completion status, brief validation evidence, and remaining limits. The presence of all four names does not establish entry point usability. Do not generate another check report merely to demonstrate compliance with this convention.
 
-## 9. 既有运行器兼容
+## 9. Existing Runner Compatibility
 
-新建四件套直接通过 `code.txt` 执行和检查本阶段，不默认接入配置文件、持久运行状态或多阶段总调度器。[最小示例](assets/minimal/readme.md) 展示输入数据经一个脚本生成表格与配套图件，运行方式为 `python code.txt`。
+New four-item layouts execute and check the stage directly through `code.txt`. Do not add configuration files, persistent execution state, or a multistage orchestrator by default. The [Minimal Example](assets/minimal/readme.md) uses one script to produce a table and supporting figures from input data, run with `python code.txt`.
 
-仓库保留 `scripts/analysis_workflow.py`，仅用于用户明确授权继续维护的既有运行器工作流。其 JSON 配置、阶段凭据、依赖计划和恢复状态与新四件套的默认布局不同；不能因工具可用就新建 `input/workflow.json`、`input/src/` 或 `output/.analysis-state/`，也不能以工具兼容为由合并独立分析阶段。只读检查同样需要已有契约，不为使用检查器另造配置文件。
+The repository retains `scripts/analysis_workflow.py` only for existing runner workflows whose continued maintenance the user explicitly authorizes. Its JSON configuration, stage receipts, dependency plans, and recovery state differ from the default layout for new stages. Tool availability does not justify creating `input/workflow.json`, `input/src/`, or `output/.analysis-state/`, or combining independent analysis stages for compatibility. Read-only checks also require an existing contract; do not create configuration merely to use a checker.
 
-维护已接入的流程时，先读取 [工具说明](references/tools.md)，明确现有配置、源码、输出和状态位置，保留其必要依赖及恢复能力，实际差异写入 README。可选运行器要求 Python 3.11+ 标准库；不自动安装环境、迁移布局或删除旧凭据。确需将此类项目整理为新四件套时，在对应授权范围内适配本阶段脚本，不能宣称仅改目录名就已经达标。
+Before maintaining an integrated workflow, read [Tool Reference](references/tools.md). Identify existing configuration, source code, output, and state locations; retain necessary dependencies and recovery capabilities; document actual differences in the README. The optional runner requires Python 3.11+ and uses the standard library. Do not automatically install environments, migrate layouts, or delete old receipts. If such a project must be organized into a new four-item layout, adapt the stage script within the corresponding authorization. Renaming directories alone does not meet the requirements.
 
-运行器的 plan、skip 或文件存在不代表本次已执行分析；配置不完整也无法推断隐藏依赖或科学口径。发生超时或未完成恢复时，先确认原进程及子程序停止，再按工具说明处理，不自动解除锁。安全替换只覆盖声明范围，不隔离任意脚本写入，也不保证全工作流原子提交或断电恢复。大文件校验强度遵循真实复现要求，不按体积自动降低，也不把旧 checksum 当作本次验证。
+The runner's plan, skip, or file-existence checks do not establish that the analysis ran in the current attempt. Incomplete configuration cannot reveal hidden dependencies or scientific criteria. After timeouts or incomplete recovery, first confirm that the original process and its child programs have stopped, then follow the tool reference; do not automatically release locks. Protected replacement covers only its declared scope. It does not isolate arbitrary script writes or guarantee atomic commits across the workflow or recovery after power loss. Set verification strength for large files according to actual reproduction requirements; do not automatically weaken it based on size or treat old checksums as current validation.

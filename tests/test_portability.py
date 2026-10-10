@@ -16,14 +16,14 @@ class PortabilityTests(unittest.TestCase):
     def exercise_layout(self, host, omit_metadata=False, remove_skill=False):
         with tempfile.TemporaryDirectory(prefix="skill-portability-") as temporary:
             base = Path(temporary).resolve()
-            skill = base / "用户 home" / host / "skills" / SOURCE.name
+            skill = base / "user Ω home" / host / "skills" / SOURCE.name
             shutil.copytree(SOURCE, skill, ignore=shutil.ignore_patterns(
                 "__pycache__", "*.pyc", ".git", ".analysis-state"))
             if omit_metadata:
                 (skill / "agents/openai.yaml").unlink()
             original = {p.relative_to(skill): p.read_bytes()
                         for p in skill.rglob("*") if p.is_file()}
-            project = base / "科研 project"
+            project = base / "research Ω project"
             shutil.copytree(skill / "assets/minimal", project)
             caller = base / "unrelated cwd"
             caller.mkdir()
@@ -65,14 +65,14 @@ class PortabilityTests(unittest.TestCase):
             invoke()
             self.assertEqual(before_output,
                              {p.name: p.read_bytes() for p in (project / "output").iterdir()})
-            invoke("--scale", "2", "--title", "迁移 <plot> & results", "--color", "#6a4c93")
+            invoke("--scale", "2", "--title", "Relocated Ω <plot> & results", "--color", "#6a4c93")
             with (project / "output/summary.tsv").open(encoding="utf-8", newline="") as table:
                 rows = list(csv.DictReader(table, delimiter="\t"))
             self.assertEqual([(r["group"], int(r["n"]), float(r["mean"])) for r in rows],
                              [("A", 2, 6.0), ("B", 2, 14.0)])
             tree = ET.parse(project / "output/means.svg")
             labels = [node.text for node in tree.findall(".//{http://www.w3.org/2000/svg}text")]
-            self.assertEqual(labels, ["迁移 <plot> & results", "A", "6", "B", "14"])
+            self.assertEqual(labels, ["Relocated Ω <plot> & results", "A", "6", "B", "14"])
             bars = tree.findall("{http://www.w3.org/2000/svg}rect")[1:]
             self.assertEqual([bar.get("fill") for bar in bars], ["#6a4c93", "#6a4c93"])
             self.assertEqual((project / "input/data.tsv").read_bytes(), before_input)

@@ -501,7 +501,7 @@ class WorkflowTests(unittest.TestCase):
 
 
     def test_bundled_example_cli_from_other_directory_and_unicode_path(self):
-        project = self.root / "中文 project"
+        project = self.root / "Unicode Ω project"
         shutil.copytree(SCRIPT.parents[1] / "assets/minimal", project)
         def cli(*parameters):
             return subprocess.run([sys.executable, "-X", "utf8", "-B", str(project / "code.txt"), *parameters],
@@ -516,9 +516,9 @@ class WorkflowTests(unittest.TestCase):
         labels = [node.text for node in tree.findall(".//{http://www.w3.org/2000/svg}text")]
         self.assertEqual(labels, ["Synthetic group means", "A", "3", "B", "7"])
         original = (project / "output/summary.tsv").read_bytes()
-        self.assertEqual(cli("--title", "中文标题").returncode, 0)
+        self.assertEqual(cli("--title", "Unicode Ω title").returncode, 0)
         self.assertEqual((project / "output/summary.tsv").read_bytes(), original)
-        self.assertIn("中文标题", (project / "output/means.svg").read_text(encoding="utf-8"))
+        self.assertIn("Unicode Ω title", (project / "output/means.svg").read_text(encoding="utf-8"))
         self.assertEqual({path.name for path in project.iterdir()},
                          {"input", "output", "code.txt", "readme.md"})
         self.assertEqual({path.name for path in (project / "input").iterdir()}, {"data.tsv"})

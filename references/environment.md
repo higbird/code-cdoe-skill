@@ -1,52 +1,52 @@
-# 环境检查、恢复与分析入口
+# Environment Checks, Recovery, and Analysis Entry Points
 
-1. 使用项目已有环境及指定解释器；没有项目约定时按用户配置、PATH 顺序定位并验证。指定路径失效要报告，不能静默切换。不要搜索整块磁盘或硬编码作者路径。
-2. 在实际执行侧确认系统、架构、解释器版本与位置、输入可读和输出可写、本任务需要的外部程序。纯 R 分析不必安装 Python 运行器；Windows 不假定存在 Bash。
-3. R 检查 R.home()、.libPaths()、逐包版本及加载错误。依赖来自本项目代码和声明，相互核对并包括动态加载；不要将 rMVP 等示例变成全局必装项。区分缺少运行时、当前库未找到、加载失败、版本冲突和权限错误。
-4. 可用环境直接继续；路径遗漏只加入已核实且兼容当前 R/架构的库。不要复制不同系统的二进制库。检查、安装、分析使用同一 R 和库配置。
-5. 已有授权范围内恢复依赖、复检、继续分析；未授权安装时提出具体包、来源、目标位置和操作，仅暂停依赖它的部分。不反复请求已有批准，不自动升级已有包、修改系统设置、改变方法或上传数据。
+1. Use the project's existing environment and specified interpreter. Without a project convention, resolve and verify the interpreter from the user's configuration, then PATH. Report an unavailable specified path rather than silently switching. Do not scan entire disks or hard-code the author's paths.
+2. On the execution side, verify the system, architecture, interpreter version and location, input readability, output writability, and required external programs. A pure R analysis does not need the Python runner; do not assume Bash is available on Windows.
+3. For R, check R.home(), .libPaths(), individual package versions, and loading errors. Cross-check dependencies against the project's code and declarations, including dynamically loaded packages. Do not make example packages such as rMVP mandatory for every project. Distinguish a missing runtime, a package absent from the active libraries, loading failure, version conflict, and permission error.
+4. Continue when the environment is usable. Add an omitted library path only after verifying compatibility with the current R and architecture. Do not copy binary libraries from another system. Use the same R and library configuration for checks, installation, and analysis.
+5. Restore dependencies, recheck, and continue within existing authorization. If installation is not authorized, identify the packages, sources, destination, and operation, pausing only dependent work. Do not request an existing approval again or automatically upgrade packages, change system settings or methods, or upload data.
 
-## 解释器与包库必须同时确认
+## Verify both the interpreter and package libraries
 
-固定 Rscript 路径只固定运行时，不固定包库。首次执行先按项目环境、用户指定配置、PATH 的顺序解析解释器，记录实际绝对路径；本次检查、恢复和分析复用该路径与启动配置。`readme.md` 给出本次验证过的命令及工作目录，不能只写裸 `Rscript` 而省略其解析依据；机器路径和环境说明集中写在 `readme.md`，必要执行路径由 `code.txt` 使用参数或环境变量读取，不另建说明配置文件，也不写死在通用 skill 中。`readme.md` 不作为机器配置读取。指定路径不可用时如实报告，不静默换用另一套 R。
+A fixed Rscript path fixes the runtime, not the libraries. Before first execution, resolve the interpreter from the project environment, the user's configuration, then PATH, and record its absolute path. Reuse that path and startup configuration for checks, recovery, and analysis. In `readme.md`, document the verified command and working directory, including how Rscript was resolved rather than only naming a bare `Rscript`. Keep machine paths and environment descriptions in `readme.md`; let `code.txt` receive required execution paths through arguments or environment variables. Do not create separate documentation or configuration files or embed machine-specific paths in the general skill. Do not parse `readme.md` as configuration. Report an unavailable specified path without silently switching to another R installation.
 
-在发生故障的执行侧记录 R.home()、R.version.string、.libPaths()、工作目录，以及与库相关的 R_LIBS、R_LIBS_USER、R_LIBS_SITE 和是否启用项目环境。区分启动目录与脚本后来 setwd() 的目录；setwd() 不会重新执行启动配置。核对启动参数是否跳过 .Rprofile/.Renviron；不能用 --vanilla 下的检查替代依赖这些配置的正式入口检查。不要输出无关环境变量或配置中的凭据。
+In the failing execution environment, record R.home(), R.version.string, .libPaths(), the working directory, the library-related R_LIBS, R_LIBS_USER, and R_LIBS_SITE variables, and whether the project environment is active. Distinguish the startup directory from a directory later selected with setwd(); setwd() does not rerun startup configuration. Check whether startup arguments bypass .Rprofile/.Renviron. A check with --vanilla cannot substitute for an entry point that relies on those files. Do not expose unrelated environment variables or credentials from configuration.
 
-## 预检失败后的处理
+## Handling preflight failures
 
-- 当前库未找到：先核对实际解释器、运行账户、项目激活及已声明的库目录；有旧环境或安装记录时，仅检查这些有依据的候选位置，不扫描整盘。其他库存在包不代表兼容，不能直接合并旧版本库。路径修复后用相同入口重新检查。
-- 包存在但加载失败：保留原始错误，按缺失依赖、DLL/系统依赖、版本或权限问题定位；不要将所有失败称为“缺包”，也不要先重装。
-- 需要安装或恢复时遵循下节授权要求。已经授权运行分析的任务，在恢复并复检通过后继续；仅整理任务不因检查依赖而擅自运行分析。
-- 继续完成不依赖失败项的必要检查，分别列出已发现的阻塞和未检查项。未覆盖其他运行条件时不得称为“唯一阻塞”。远端故障不能用本机成功或失败推定原因。
+- Package absent from active libraries: verify the interpreter, execution account, project activation, and declared library directories. If previous environments or installation records exist, check only candidate locations supported by that evidence; do not scan the entire disk. A package in another library is not necessarily compatible. Do not merge old version-specific libraries without checking. After repairing paths, recheck through the same entry point.
+- Package present but loading fails: preserve the original error and investigate missing dependencies, DLL or system dependencies, version conflicts, and permissions. Do not label every failure as a missing package or begin with reinstallation.
+- Follow the authorization rules below for installation or recovery. If running the analysis is already authorized, continue after recovery and successful rechecking. A request only to organize files does not authorize analysis execution during dependency checks.
+- Complete required checks that do not depend on the failure. List established blockers separately from unchecked conditions. Do not call an issue the only blocker unless other runtime conditions have been checked. Local success or failure does not establish the cause of a remote failure.
 
-将诊断的最小证据合入现有 README：实际解释器和启动方式、活动库、逐包状态及关键原始错误、已尝试的恢复与复检结果、仍需的具体操作。未取得执行证据时写“未验证”，不把状态摘要当作原始报错。仅整理完成与分析受阻分别报告。
+Add the minimum diagnostic evidence to the existing README: the interpreter and startup command, active libraries, package status and relevant original errors, attempted recovery and recheck results, and any remaining specific operations. Mark unverified execution conditions as "not verified"; a status summary is not the original error. Report completed organization separately from blocked analysis.
 
-## 可执行 R 预检
+## Executable R preflight
 
-在实际 `code.txt` 分析代码之前，从本次加载的 skill 安装目录 source `scripts/r_environment.R`，再调用 require_r_environment；项目已有等效预检时可直接复用。skill_root 从当前加载位置解析，并通过明确参数或环境变量传给入口；不将辅助代码复制到 `input/src/`，不写死作者路径。独立交付且无法访问 skill 工具时，可将所需预检逻辑并入 `code.txt`，并在 `readme.md` 说明依赖和运行方式。
+Before analysis code in `code.txt`, source `scripts/r_environment.R` from the loaded skill installation and call require_r_environment. An existing equivalent project preflight may be reused. Resolve skill_root from the loaded location and pass it to the entry point through an explicit argument or environment variable. Do not copy auxiliary code into `input/src/` or hard-code the author's paths. For a standalone delivery without access to the skill tools, include the required preflight logic in `code.txt` and document dependencies and execution in `readme.md`.
 
 ```r
 source(file.path(skill_root, 'scripts', 'r_environment.R'))
-# 以下为接口示例；真实清单来自本项目。
+# Interface example only; use this project's actual dependency list.
 require_r_environment(c('stats', 'utils'))
-# 预检通过后执行本入口中的分析代码。
+# Run this entry point's analysis code after preflight succeeds.
 ```
 
-check_r_environment 返回逐包状态而不因缺包退出；require_r_environment 对任何失败抛出错误，应传播至进程退出码。可传 library=已存在的库目录、versions=c(包名='已验证版本') 精确校验。不要捕获错误后继续分析。
+check_r_environment returns individual package status without exiting for missing packages. require_r_environment raises an error on any failure, which must propagate to the process exit code. Pass an existing library directory through `library`; use `versions`, for example `versions=c(package='verified-version')`, for exact version checks. Do not catch errors and continue the analysis.
 
-默认检查不联网或创建目录；包加载自身可能运行初始化代码。writable_hint 只是权限提示。脚本不负责自动发现 R、推断依赖或系统编译环境。库配置持续作用于当前进程，启动另一个 R 时必须同样激活环境或再次配置。
+The default check does not access the network or create directories; package loading may run initialization code. writable_hint is only a permission hint. The script does not discover R, infer dependencies, or determine the system's build environment. Library settings remain active in the current process. A separate R process must activate the same environment or configure the libraries again.
 
-## 恢复
+## Recovery
 
-- 已有 renv 等环境：优先原有激活和锁文件恢复，不绕过锁文件调用通用安装函数；恢复后启动新 R 进程复检。保留经过验证的版本、源仓库和固定提交。
-- 无锁文件且已授权安装：创建明确的项目/用户包库，使用同一 R 调用 install_missing_r_packages(packages, library, repos)，仓库必须明确。仅请求当前缺失包及必要依赖；依赖解析仍可能引入不同版本，因此它不是版本恢复器，不提供失败回滚。跨机器交付前核对必要版本与环境并在 `readme.md` 记录；已有锁文件继续维护，新增锁文件依用户明确要求，不默认每阶段新建。
-- 已安装但加载失败、版本冲突：依据原始错误诊断，必要时经授权建立新隔离环境，不盲目重装。网络、镜像、系统库、编译器错误分别报告；不自动更换来源或解除安装锁。
-- 离线复用兼容且已验证缓存；无缓存则说明阻塞。renv 不负责安装 R 本身或全部系统依赖；系统复杂时可提出容器或远端方案，但不默认部署、上传或产生费用。
+- Existing renv or similar environment: use its existing activation and lockfile restoration rather than bypassing the lockfile with a general installer. Recheck in a new R process after restoration. Preserve verified versions, source repositories, and pinned commits.
+- No lockfile and installation authorized: create a specified project or user library and call install_missing_r_packages(packages, library, repos) with the same R and an explicit repository. Request only missing packages and their required dependencies. Dependency resolution may introduce other versions; this function is not a version-restoration tool and offers no rollback on failure. Before delivery across machines, verify required versions and the environment and document them in `readme.md`. Maintain existing lockfiles; create a new one only when the user explicitly requests it, not by default for each stage.
+- Installed package fails to load or has a version conflict: diagnose from the original error. If needed and authorized, create a new isolated environment rather than reinstalling without evidence. Report network, mirror, system-library, and compiler errors separately. Do not automatically change sources or remove installation locks.
+- Offline: reuse a compatible, verified cache. Without one, report the blocker. renv does not install R itself or all system dependencies. A container or remote environment may be proposed for complex system requirements, but do not deploy, upload, or incur costs by default.
 
-## 目录与验收
+## Layout and validation
 
-四项阶段结构的环境例外仅为必须原位保留的既有环境文件（如 .Rprofile、renv.lock、renv/、.venv），或用户明确要求新增的环境工具元数据；在 `readme.md` 说明用途，不为精简目录删除或破坏已有环境。优先复用项目总目录环境，不默认每阶段新建锁文件或环境目录。软件及包版本、依赖环境和安装或恢复说明集中在 `readme.md`，不另外在 `input/` 创建配置或环境说明。包库和缓存不是科研输入或结果，不强塞进 input/output，不随发布包复制机器相关库。
+Environment exceptions to the four-part stage layout are limited to existing environment files that must remain in place, such as .Rprofile, renv.lock, renv/, and .venv, or new environment-tool metadata explicitly requested by the user. Explain their purpose in `readme.md`; do not delete or damage an existing environment to simplify the directory. Prefer the overall project's environment rather than creating a lockfile or environment directory for each stage. Keep software and package versions, dependency descriptions, and installation or recovery instructions in `readme.md`, without additional configuration or environment-description files in `input/`. Package libraries and caches are neither research inputs nor results; do not put them in input/output or copy machine-specific libraries into a release package.
 
-测试分开报告：目录搬迁、实际 R 检查与阻断、隔离库恢复、各系统/架构、真实客户端。模拟错误只证明控制逻辑，不能算真实联网安装或跨平台验收。只承诺有验证证据的支持范围。
+Report validation separately for directory relocation, actual R preflight and failure blocking, isolated-library recovery, each system and architecture, and real clients. Simulated errors test control flow, not live network installation or cross-platform validation. Claim support only where evidence exists.
 
-参考：[R 包搜索路径](https://stat.ethz.ch/R-manual/R-devel/library/base/html/libPaths.html)、[renv 及边界](https://rstudio.github.io/renv/articles/renv.html)。
+References: [R library search paths](https://stat.ethz.ch/R-manual/R-devel/library/base/html/libPaths.html), [renv and its scope](https://rstudio.github.io/renv/articles/renv.html).
